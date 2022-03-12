@@ -21,8 +21,8 @@ EPOCHS = 30
 LR = 0.001
 LR_FINETUNE = 0.0005
 
-WARMUP_PLOT = os.path.join("output", "warmup.png")
+FEATURE_EXTRACTION_PLOT = os.path.join("output", "feature_extraction.png")
 FINETUNE_PLOT = os.path.join("output", "finetune.png")
-WARMUP_MODEL = os.path.join("output", "warmup_model.pth")
+FEATURE_EXTRACTION_MODEL = os.path.join("output", "feature_extraction_model.pth")
 FINETUNE_MODEL = os.path.join("output", "finetune_model.pth")
 

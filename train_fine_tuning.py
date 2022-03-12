@@ -7,12 +7,12 @@ from tqdm import tqdm
 from torch import nn
 import matplotlib.pyplot as plt
 import numpy as np
+import shutil
 import torch
 import time
+import os
 
 def train():
-    torch.multiprocessing.set_sharing_strategy('file_system')
-    torch.multiprocessing.freeze_support()
 
     trainTansform = transforms.Compose([
         transforms.RandomResizedCrop(config.IMAGE_SIZE),
@@ -21,42 +21,54 @@ def train():
         transforms.ToTensor(),
         transforms.Normalize(mean=config.MEAN, std=config.STD)
     ])
-
     valTransform = transforms.Compose([
         transforms.Resize((config.IMAGE_SIZE, config.IMAGE_SIZE)),
         transforms.ToTensor(),
         transforms.Normalize(mean=config.MEAN, std=config.STD)
     ])
 
-    (trainDS, trainLoader) = create_dataloaders.get_dataloader(config.TRAIN, transforms=trainTansform, batchSize=config.FEATURE_EXTRACTION_BATCH_SIZE)
-    (valDS, valLoader) = create_dataloaders.get_dataloader(config.VAL, transforms=valTransform, batchSize=config.FEATURE_EXTRACTION_BATCH_SIZE, shuffle=False)
+    (trainDS, trainLoader) = create_dataloaders.get_dataloader(config.TRAIN, transforms=trainTansform, batchSize=config.FINETUNE_BATCH_SIZE)
+    (valDS, valLoader) = create_dataloaders.get_dataloader(config.VAL, transforms=valTransform, batchSize=config.FINETUNE_BATCH_SIZE, shuffle=False)
 
-
+    # load up the ResNet50 model
     model = resnet50(pretrained=True)
+    numFeatures = model.fc.in_features
 
-    # since we are using the ResNet50 model as a feature extractor we set its parameters to non-trainable (by default they are trainable)
-    for param in model.parameters():
-        param.requires_grad = False
+    # loop over the modules of the model and set the parameters of batch normalization modules as not trainable
+    for module, param in zip(model.modules(), model.parameters()):
+        if isinstance(module, nn.BatchNorm2d):
+            param.requires_grad = False
+
+    # define the network head and attach it to the model
+    headModel = nn.Sequential(
+        nn.Linear(numFeatures, 512),
+        nn.ReLU(),
+        nn.Dropout(0.25),
+        nn.Linear(512, 256),
+        nn.ReLU(),
+        nn.Dropout(0.5),
+        nn.Linear(256, len(trainDS.classes))
+    )
+    model.fc = headModel
 
     # append a new classification top to our feature extractor and pop it on to the current device
-    modelOutputFeats = model.fc.in_features
-    model.fc = nn.Linear(modelOutputFeats, len(trainDS.classes))
     model = model.to(config.DEVICE)
 
     # initialize loss function and optimizer (notice that we are only providing the parameters of the classification top to our optimizer)
     lossFunc = nn.CrossEntropyLoss()
-    opt = torch.optim.Adam(model.fc.parameters(), lr=config.LR)
+    opt = torch.optim.Adam(model.parameters(), lr=config.LR)
 
     # calculate steps per epoch for training and validation set
-    trainSteps = len(trainDS) // config.FEATURE_EXTRACTION_BATCH_SIZE
-    valSteps = len(valDS) // config.FEATURE_EXTRACTION_BATCH_SIZE
+    trainSteps = len(trainDS) // config.FINETUNE_BATCH_SIZE
+    valSteps = len(valDS) // config.FINETUNE_BATCH_SIZE
 
     # initialize a dictionary to store training history
     H = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": []}
 
+
+    # loop over epochs
     print("[INFO] training the network...")
     startTime = time.time()
-
     for e in tqdm(range(config.EPOCHS)):
 
         # set the model in training mode
@@ -145,11 +157,15 @@ def train():
     plt.xlabel("Epoch #")
     plt.ylabel("Loss/Accuracy")
     plt.legend(loc="lower left")
-    plt.savefig(config.FEATURE_EXTRACTION_PLOT)
+    plt.savefig(config.FINETUNE_PLOT)
 
     # serialize the model to disk
-    torch.save(model, config.FEATURE_EXTRACTION_MODEL)
+    torch.save(model, config.FINETUNE_MODEL)
 
 
 if __name__ == '__main__':
     train()
+
+
+
+
