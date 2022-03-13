@@ -30,12 +30,12 @@ def train():
         transforms.Normalize(mean=config.MEAN, std=config.STD)
     ])
 
-    train_dataset = datasets.ImageFolder(root=config.TRAIN, transform=train_tansforms)
+    train_dataset = datasets.ImageFolder(root=config.TRAIN, transform=train_transforms)
     train_loader = DataLoader(train_dataset, batch_size=config.FEATURE_EXTRACTION_BATCH_SIZE, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
 
     val_dataset = datasets.ImageFolder(root=config.VAL, transform=val_transforms)
     val_loader = DataLoader(val_dataset, batch_size=config.FEATURE_EXTRACTION_BATCH_SIZE, shuffle=False, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
-    
+
     # load ResNet50 model as feature extractor
     model = models.resnet50(pretrained=True)
 
