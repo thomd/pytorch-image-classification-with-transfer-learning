@@ -8,6 +8,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from torchvision import datasets
+from torch.utils.tensorboard import SummaryWriter
 import os
 import time
 
@@ -59,6 +60,7 @@ def train():
     log = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": []}
 
     print("[INFO] training the network...")
+    writer = SummaryWriter()
     start_time = time.time()
 
     for epoch in tqdm(range(config.EPOCHS)):
@@ -116,18 +118,22 @@ def train():
                 val_correct += (pred.argmax(1) == y).type(torch.float).sum().item()
 
         # calculate the average training and validation loss
-        avg_train_loss = total_train_loss / train_steps
-        avg_val_loss = total_val_loss / val_steps
+        avg_train_loss = (total_train_loss / train_steps).cpu().detach().numpy()
+        avg_val_loss = (total_val_loss / val_steps).cpu().detach().numpy()
 
         # calculate the training and validation accuracy
         train_correct = train_correct / len(train_dataset)
         val_correct = val_correct / len(val_dataset)
 
         # update our training history
-        log['train_loss'].append(avg_train_loss.cpu().detach().numpy())
+        log['train_loss'].append(avg_train_loss)
+        writer.add_scalar('Loss/Train', avg_train_loss, epoch)
         log['train_acc'].append(train_correct)
-        log['val_loss'].append(avg_val_loss.cpu().detach().numpy())
+        writer.add_scalar('Accuracy/Train', train_correct, epoch)
+        log['val_loss'].append(avg_val_loss)
+        writer.add_scalar('Loss/Validation', avg_val_loss, epoch)
         log['val_acc'].append(val_correct)
+        writer.add_scalar('Accuracy/Validation', val_correct, epoch)
 
         # print the model training and validation information
         print(f'EPOCH: {epoch + 1}/{config.EPOCHS}')
@@ -137,6 +143,8 @@ def train():
     # display the total time needed to perform the training
     end_time = time.time()
     print(f'Total time to train the model: {(end_time - start_time):.2f}s')
+    writer.flush()
+    writer.close()
 
     # plot the training loss and accuracy
     plt.style.use('ggplot')
