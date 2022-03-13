@@ -14,7 +14,7 @@ def copy_images(imagePaths, folder):
         labelFolder = os.path.join(folder, label)
         if not os.path.exists(labelFolder):
             os.makedirs(labelFolder)
-        estination = os.path.join(labelFolder, imageName)
+        destination = os.path.join(labelFolder, imageName)
         shutil.copy(path, destination)
 
 print('[INFO] loading image paths...')
