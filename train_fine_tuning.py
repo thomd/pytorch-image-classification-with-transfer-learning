@@ -1,5 +1,4 @@
 from pyimagesearch import config
-from pyimagesearch import create_dataloaders
 from imutils import paths
 from torchvision.models import resnet50
 from torchvision import transforms
