@@ -51,6 +51,12 @@ Create new Colab Notebook and run these commands:
     !kaggle datasets download -d imsparsh/flowers-dataset
     !unzip -qq flowers-dataset.zip -d flower-photos
     !python build_dataset.py
+    %load_ext tensorboard
+
+    %tensorboard --logdir=./runs
+
+    !python train_feature_extraction.py
+
 
 
 

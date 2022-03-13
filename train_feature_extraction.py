@@ -119,8 +119,8 @@ def train():
                 val_correct += (pred.argmax(1) == y).type(torch.float).sum().item()
 
         # calculate the average training and validation loss
-        avg_train_loss = (total_train_loss / train_steps).cpu().detach().numpy()
-        avg_val_loss = (total_val_loss / val_steps).cpu().detach().numpy()
+        avg_train_loss = (total_train_loss / train_steps).cpu().detach().numpy().item()
+        avg_val_loss = (total_val_loss / val_steps).cpu().detach().numpy().item()
 
         # calculate the training and validation accuracy
         train_correct = train_correct / len(train_dataset)
