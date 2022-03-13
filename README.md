@@ -17,6 +17,10 @@ Source: [PyTorch: Transfer Learning and Image Classification](https://pyimagesea
 
 ## Train by Feature Extraction
 
+Using this method we are able to utilize CNNs to recognize classes it was never trained on!
+
+Remove the fc-layer head from the pre-trained network and replace it with a softmax classifier. This method is super simple as it allows to treat the pre-trained CNN as a feature extractor and then pass those features through a logistic-regression classifier.
+
     ulimit -n 10240
     python train_feature_extraction.py
 
