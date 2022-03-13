@@ -6,7 +6,7 @@ import os
 
 def copy_images(imagePaths, folder):
     if not os.path.exists(folder):
-    os.makedirs(folder)
+        os.makedirs(folder)
 
     for path in imagePaths:
         imageName = path.split(os.path.sep)[-1]
