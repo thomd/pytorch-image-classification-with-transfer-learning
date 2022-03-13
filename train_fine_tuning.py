@@ -27,12 +27,15 @@ def train():
         transforms.Normalize(mean=config.MEAN, std=config.STD)
     ])
 
-    (trainDS, trainLoader) = create_dataloaders.get_dataloader(config.TRAIN, transforms=trainTansform, batchSize=config.FINETUNE_BATCH_SIZE)
-    (valDS, valLoader) = create_dataloaders.get_dataloader(config.VAL, transforms=valTransform, batchSize=config.FINETUNE_BATCH_SIZE, shuffle=False)
+    train_dataset = datasets.ImageFolder(root=config.TRAIN, transform=train_tansforms)
+    train_loader = DataLoader(train_dataset, batch_size=config.FEATURE_EXTRACTION_BATCH_SIZE, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
 
-    # load up the ResNet50 model
+    val_dataset = datasets.ImageFolder(root=config.VAL, transform=val_transforms)
+    val_loader = DataLoader(val_dataset, batch_size=config.FEATURE_EXTRACTION_BATCH_SIZE, shuffle=False, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
+
+    # load ResNet50 model for fine tuning
     model = resnet50(pretrained=True)
-    numFeatures = model.fc.in_features
+    num_features = model.fc.in_features
 
     # loop over the modules of the model and set the parameters of batch normalization modules as not trainable
     for module, param in zip(model.modules(), model.parameters()):
@@ -40,69 +43,67 @@ def train():
             param.requires_grad = False
 
     # define the network head and attach it to the model
-    headModel = nn.Sequential(
-        nn.Linear(numFeatures, 512),
+    model.fc = nn.Sequential(
+        nn.Linear(num_features, 512),
         nn.ReLU(),
         nn.Dropout(0.25),
         nn.Linear(512, 256),
         nn.ReLU(),
         nn.Dropout(0.5),
-        nn.Linear(256, len(trainDS.classes))
+        nn.Linear(256, len(train_dataset.classes))
     )
-    model.fc = headModel
-
-    # append a new classification top to our feature extractor and pop it on to the current device
     model = model.to(config.DEVICE)
 
     # initialize loss function and optimizer (notice that we are only providing the parameters of the classification top to our optimizer)
-    lossFunc = nn.CrossEntropyLoss()
-    opt = torch.optim.Adam(model.parameters(), lr=config.LR)
+    loss_fn = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=config.LR)
 
     # calculate steps per epoch for training and validation set
-    trainSteps = len(trainDS) // config.FINETUNE_BATCH_SIZE
-    valSteps = len(valDS) // config.FINETUNE_BATCH_SIZE
+    train_steps = len(train_dataset) // config.FINETUNE_BATCH_SIZE
+    val_steps = len(val_dataset) // config.FINETUNE_BATCH_SIZE
 
     # initialize a dictionary to store training history
-    H = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": []}
+    log = {'train_loss': [], 'train_acc': [], 'val_loss': [], 'val_acc': []}
 
 
-    # loop over epochs
-    print("[INFO] training the network...")
-    startTime = time.time()
-    for e in tqdm(range(config.EPOCHS)):
+    print('[INFO] training the network...')
+    writer = SummaryWriter()
+    start_time = time.time()
+
+    for epoch in tqdm(range(config.EPOCHS)):
 
         # set the model in training mode
         model.train()
 
         # initialize the total training and validation loss
-        totalTrainLoss = 0
-        totalValLoss = 0
+        total_train_loss = 0
+        total_val_loss = 0
 
         # initialize the number of correct predictions in the training and validation step
-        trainCorrect = 0
-        valCorrect = 0
+        train_correct = 0
+        val_correct = 0
 
         # loop over the training set
-        for (i, (x, y)) in enumerate(trainLoader):
+        for (batch_idx, (X, y)) in enumerate(train_loader):
 
             # send the input to the device
-            (x, y) = (x.to(config.DEVICE), y.to(config.DEVICE))
+            (X, y) = (X.to(config.DEVICE), y.to(config.DEVICE))
 
             # perform a forward pass and calculate the training loss
-            pred = model(x)
-            loss = lossFunc(pred, y)
+            pred = model(X)
+            loss = loss_fn(pred, y)
 
             # calculate the gradients
             loss.backward()
 
             # check if we are updating the model parameters and if so update them, and zero out the previously accumulated gradients
-            if (i + 2) % 2 == 0:
-                opt.step()
-                opt.zero_grad()
+            if (batch_idx + 2) % 2 == 0:
+                optimizer.step()
+                optimizer.zero_grad()
 
             # add the loss to the total training loss so far and calculate the number of correct predictions
-            totalTrainLoss += loss
-            trainCorrect += (pred.argmax(1) == y).type(torch.float).sum().item()
+            total_train_loss += loss
+            train_correct += (pred.argmax(1) == y).type(torch.float).sum().item()
 
         # switch off autograd
         with torch.no_grad():
@@ -111,52 +112,56 @@ def train():
             model.eval()
 
             # loop over the validation set
-            for (x, y) in valLoader:
+            for (X, y) in val_loader:
 
                 # send the input to the device
-                (x, y) = (x.to(config.DEVICE), y.to(config.DEVICE))
+                (X, y) = (X.to(config.DEVICE), y.to(config.DEVICE))
 
                 # make the predictions and calculate the validation loss
-                pred = model(x)
-                totalValLoss += lossFunc(pred, y)
+                pred = model(X)
+                total_val_loss += loss_fn(pred, y)
 
                 # calculate the number of correct predictions
-                valCorrect += (pred.argmax(1) == y).type(torch.float).sum().item()
+                val_correct += (pred.argmax(1) == y).type(torch.float).sum().item()
 
         # calculate the average training and validation loss
-        avgTrainLoss = totalTrainLoss / trainSteps
-        avgValLoss = totalValLoss / valSteps
+        avg_train_loss = (total_train_loss / train_steps).cpu().detach().numpy().item()
+        avg_val_loss = (total_val_loss / val_steps).cpu().detach().numpy().item()
 
         # calculate the training and validation accuracy
-        trainCorrect = trainCorrect / len(trainDS)
-        valCorrect = valCorrect / len(valDS)
+        train_correct = train_correct / len(train_dataset)
+        val_correct = val_correct / len(val_dataset)
 
         # update our training history
-        H["train_loss"].append(avgTrainLoss.cpu().detach().numpy())
-        H["train_acc"].append(trainCorrect)
-        H["val_loss"].append(avgValLoss.cpu().detach().numpy())
-        H["val_acc"].append(valCorrect)
+        log['train_loss'].append(avg_train_loss)
+        log['train_acc'].append(train_correct)
+        log['val_loss'].append(avg_val_loss)
+        log['val_acc'].append(val_correct)
+        writer.add_scalars('Loss', {'Train': avg_train_loss, 'Validation': avg_val_loss}, epoch)
+        writer.add_scalars('Accuracy', {'Train': train_correct, 'Validation': val_correct}, epoch)
 
         # print the model training and validation information
-        print("[INFO] EPOCH: {}/{}".format(e + 1, config.EPOCHS))
-        print("Train loss: {:.6f}, Train accuracy: {:.4f}".format(avgTrainLoss, trainCorrect))
-        print("Val loss: {:.6f}, Val accuracy: {:.4f}".format(avgValLoss, valCorrect))
+        print(f'EPOCH: {epoch + 1}/{config.EPOCHS}')
+        print(f'Train Loss: {avg_train_loss:.6f}, Train Accuracy: {train_correct:.4f}')
+        print(f'Validation Loss: {avg_val_loss:.6f}, Validation Accuracy: {val_correct:.4f}')
 
     # display the total time needed to perform the training
-    endTime = time.time()
-    print("[INFO] total time taken to train the model: {:.2f}s".format(endTime - startTime))
+    end_time = time.time()
+    print(f'Total time to train the model: {(end_time - start_time):.2f}s')
+    writer.flush()
+    writer.close()
+
 
     # plot the training loss and accuracy
-    plt.style.use("ggplot")
+    plt.style.use('ggplot')
     plt.figure()
-    plt.plot(H["train_loss"], label="train_loss")
-    plt.plot(H["val_loss"], label="val_loss")
-    plt.plot(H["train_acc"], label="train_acc")
-    plt.plot(H["val_acc"], label="val_acc")
-    plt.title("Training Loss and Accuracy on Dataset")
-    plt.xlabel("Epoch #")
-    plt.ylabel("Loss/Accuracy")
-    plt.legend(loc="lower left")
+    plt.plot(log['train_loss'], label='train loss')
+    plt.plot(log['val_loss'], label='val loss')
+    plt.plot(log['train_acc'], label='train acc')
+    plt.plot(log['val_acc'], label='val acc')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss / Accuracy')
+    plt.legend()
     plt.savefig(config.FINETUNE_PLOT)
 
     # serialize the model to disk

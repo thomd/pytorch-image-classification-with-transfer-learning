@@ -13,7 +13,7 @@ import os
 import time
 
 def train():
-    torch.multiprocessing.set_sharing_strategy('file_system')
+    # torch.multiprocessing.set_sharing_strategy('file_system')
     # torch.multiprocessing.freeze_support()
 
     train_tansforms = transforms.Compose([
@@ -44,8 +44,8 @@ def train():
         param.requires_grad = False
 
     # append a new classification top to our feature extractor and pop it on to the current device
-    modelOutputFeats = model.fc.in_features
-    model.fc = nn.Linear(modelOutputFeats, len(train_dataset.classes))
+    output_features = model.fc.in_features
+    model.fc = nn.Linear(output_features, len(train_dataset.classes))
     model = model.to(config.DEVICE)
 
     # initialize loss function and optimizer (notice that we are only providing the parameters of the classification top to our optimizer)
@@ -58,9 +58,9 @@ def train():
     val_steps = len(val_dataset) // config.FEATURE_EXTRACTION_BATCH_SIZE
 
     # initialize a dictionary to store training history
-    log = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": []}
+    log = {'train_loss': [], 'train_acc': [], 'val_loss': [], 'val_acc': []}
 
-    print("[INFO] training the network...")
+    print('[INFO] training the network...')
     writer = SummaryWriter()
     start_time = time.time()
 
@@ -128,13 +128,11 @@ def train():
 
         # update our training history
         log['train_loss'].append(avg_train_loss)
-        writer.add_scalar('Loss/Train', avg_train_loss, epoch)
         log['train_acc'].append(train_correct)
-        writer.add_scalar('Accuracy/Train', train_correct, epoch)
         log['val_loss'].append(avg_val_loss)
-        writer.add_scalar('Loss/Validation', avg_val_loss, epoch)
         log['val_acc'].append(val_correct)
-        writer.add_scalar('Accuracy/Validation', val_correct, epoch)
+        writer.add_scalars('Loss', {'Train': avg_train_loss, 'Validation': avg_val_loss}, epoch)
+        writer.add_scalars('Accuracy', {'Train': train_correct, 'Validation': val_correct}, epoch)
 
         # print the model training and validation information
         print(f'EPOCH: {epoch + 1}/{config.EPOCHS}')
