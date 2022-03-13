@@ -50,7 +50,8 @@ def train():
 
     # initialize loss function and optimizer (notice that we are only providing the parameters of the classification top to our optimizer)
     loss_fn = nn.CrossEntropyLoss()
-    opt = torch.optim.Adam(model.fc.parameters(), lr=config.LR)
+    optimizer = torch.optim.Adam(model.fc.parameters(), lr=config.LR)
+    #optimizer = torch.optim.SGD(model.fc.parameters(), lr=0.001, momentum=0.9)
 
     # calculate steps per epoch for training and validation set
     train_steps = len(train_dataset) // config.FEATURE_EXTRACTION_BATCH_SIZE
@@ -90,9 +91,9 @@ def train():
             loss.backward()
 
             # check if we are updating the model parameters and if so update them, and zero out the previously accumulated gradients
-            if (i + 2) % 2 == 0:
-                opt.step()
-                opt.zero_grad()
+            if (batch_idx + 2) % 2 == 0:
+                optimizer.step()
+                optimizer.zero_grad()
 
             # add the loss to the total training loss so far and calculate the number of correct predictions
             total_train_loss += loss
