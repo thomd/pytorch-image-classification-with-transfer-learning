@@ -16,14 +16,14 @@ import os
 
 def train():
 
-    trainTansform = transforms.Compose([
+    train_transforms = transforms.Compose([
         transforms.RandomResizedCrop(config.IMAGE_SIZE),
         transforms.RandomHorizontalFlip(),
         transforms.RandomRotation(90),
         transforms.ToTensor(),
         transforms.Normalize(mean=config.MEAN, std=config.STD)
     ])
-    valTransform = transforms.Compose([
+    val_transforms = transforms.Compose([
         transforms.Resize((config.IMAGE_SIZE, config.IMAGE_SIZE)),
         transforms.ToTensor(),
         transforms.Normalize(mean=config.MEAN, std=config.STD)
