@@ -1,4 +1,4 @@
-from pyimagesearch import config
+import config
 from imutils import paths
 import numpy as np
 import shutil
