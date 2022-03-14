@@ -21,6 +21,13 @@ def train(args):
     else:
         batch_size = config.FEATURE_EXTRACTION_BATCH_SIZE
 
+    if args['lr'] != None:
+        lr = args['lr']
+    elif args['type'] == 'fine-tuning':
+        lr = config.LR_FINETUNE
+    else:
+        lr = config.LR
+
     # torch.multiprocessing.set_sharing_strategy('file_system')
     # torch.multiprocessing.freeze_support()
 
@@ -44,9 +51,11 @@ def train(args):
     val_dataset = datasets.ImageFolder(root=config.VAL, transform=val_transforms)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
 
-    # load ResNet50 model as feature extractor
-    model = models.resnet50(pretrained=True)
+    # load model // TODO: add other nets
+    if args['model'] == 'resnet':
+        model = models.resnet50(pretrained=True)
 
+    # FEATURE EXTRACTION
     if args['type'] == 'feature-extraction':
         # freeze parameters to non-trainable (by default they are trainable)
         for param in model.parameters():
@@ -61,11 +70,12 @@ def train(args):
         loss_fn = nn.CrossEntropyLoss()
 
         if args['optimizer'] == 'adam':
-            optimizer = torch.optim.Adam(model.fc.parameters(), lr=config.LR)
+            optimizer = torch.optim.Adam(model.fc.parameters(), lr=lr)
         else:
-            optimizer = torch.optim.SGD(model.fc.parameters(), lr=0.001, momentum=0.9)
+            optimizer = torch.optim.SGD(model.fc.parameters(), lr=lr, momentum=0.9)
 
     else:
+        # FINE TUNE
         num_features = model.fc.in_features
 
         # loop over the modules of the model and set the parameters of batch normalization modules as not trainable
@@ -89,9 +99,9 @@ def train(args):
         loss_fn = nn.CrossEntropyLoss()
 
         if args['optimizer'] == 'adam':
-            optimizer = torch.optim.Adam(model.parameters(), lr=config.LR)
+            optimizer = torch.optim.Adam(model.parameters(), lr=lr)
         else:
-            optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+            optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.9)
 
     # calculate steps per epoch for training and validation set
     train_steps = len(train_dataset) // batch_size
@@ -100,9 +110,11 @@ def train(args):
     # initialize a dictionary to store training history
     log = {'train_loss': [], 'train_acc': [], 'val_loss': [], 'val_acc': []}
 
-    print(f'[INFO] type:       {args["type"]}')
-    print(f'[INFO] optimizer:  {args["optimizer"]}')
-    print(f'[INFO] batch size: {batch_size}')
+    print(f'[INFO] model:         {args["model"]}')
+    print(f'[INFO] type:          {args["type"]}')
+    print(f'[INFO] optimizer:     {args["optimizer"]}')
+    print(f'[INFO] batch size:    {batch_size}')
+    print(f'[INFO] learning rate: {lr}')
     start_time = time.time()
     if args['tensorboard']:
         writer = SummaryWriter(args['log_path'])
@@ -211,11 +223,13 @@ def train(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Transfer Learning of a CNN.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--type', default='fine-tuning', choices=['feature-extraction', 'fine-tuning'], help='type of transfer learning')
+    parser.add_argument('--model', default='resnet', choices=['resnet'], help='pre-trained model')
     parser.add_argument('--optimizer', default='adam', choices=['adam', 'sgd'], help='type of optimizer')
     parser.add_argument('--plot', default=False, type=bool, help='create image for loss/accuracy')
     parser.add_argument('--tensorboard', default=True, type=bool, help='write Tensorboard logs')
     parser.add_argument('--log-path', type=pathlib.Path, default='./runs', help='path to Tensorboard logs')
     parser.add_argument('--batch', type=int, help='batch size')
+    parser.add_argument('--lr', type=float, help='learning rate')
     parser.add_argument('--epochs', type=int, default=config.EPOCHS, help='number of epochs')
     args = vars(parser.parse_args())
 

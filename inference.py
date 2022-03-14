@@ -64,8 +64,7 @@ def inference(args):
         for i in range(0, batch_size):
 
             # initalize a subplot
-            # ax = plt.subplot(1, batch_size, i + 1)
-            ax = plt.subplot((i % 2) + 1, 4, i + 1)
+            ax = plt.subplot(1, batch_size, i + 1)
 
             # grab the image, de-normalize it, scale the raw pixel intensities to the range [0, 255], and change the channel ordering from channels first tp channels last
             image = images[i]
@@ -89,12 +88,13 @@ def inference(args):
 
         # show the plot
         plt.tight_layout()
-        plt.show()
+        plt.savefig(args['image_path'])
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Inference of Test Images', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--model', type=pathlib.Path, required=True, help='path to trained model model')
+    parser.add_argument('--image-path', type=pathlib.Path, default='output/inference.png', help='path to inference image')
     parser.add_argument('--batch', type=int, default=config.PRED_BATCH_SIZE, help='batch size')
     args = vars(parser.parse_args())
 

@@ -31,7 +31,7 @@ Source: [PyTorch: Transfer Learning and Image Classification](https://pyimagesea
 
 ## Run in Google Colab
 
-Create new Colab Notebook and run these commands:
+Create new [Colab Notebook](https://colab.research.google.com) and run these commands:
 
     %cd /content
     !nvidia-smi
@@ -42,6 +42,7 @@ Create new Colab Notebook and run these commands:
     !mv kaggle.json ~/.kaggle/
     !chmod 600 /root/.kaggle/kaggle.json
 
+
     !git clone https://github.com/thomd/pytorch-image-classification-with-transfer-learning.git
     %cd pytorch-image-classification-with-transfer-learning
     !kaggle datasets download -d imsparsh/flowers-dataset
@@ -49,7 +50,15 @@ Create new Colab Notebook and run these commands:
     !python build_dataset.py
     %load_ext tensorboard
 
+
     %tensorboard --logdir=./runs
 
-    !python train.py --help
 
+    !python train.py --help
+    !python train.py --type fine-tuning
+
+
+    !python inference.py --help
+    !python inference.py --model output/finetune_model.pth
+    from IPython.display import Image
+    display(Image('output/inference.png'))
