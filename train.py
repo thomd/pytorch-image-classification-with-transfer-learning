@@ -214,11 +214,10 @@ if __name__ == '__main__':
     parser.add_argument('--type', default='fine-tuning', choices=['feature-extraction', 'fine-tuning'], help='type of transfer learning')
     parser.add_argument('--optimizer', default='adam', choices=['adam', 'sgd'], help='type of optimizer')
     parser.add_argument('--plot', default=False, type=bool, help='create image for loss/accuracy')
-    parser.add_argument('--tensorboard', default=True, action=argparse.BooleanOptionalAction, help='write Tensorboard logs')
+    parser.add_argument('--tensorboard', default=True, type=bool, help='write Tensorboard logs')
     parser.add_argument('--log-path', type=pathlib.Path, default='./runs', help='path to Tensorboard logs')
     parser.add_argument('--batch', type=int, help='batch size')
     parser.add_argument('--epochs', type=int, default=config.EPOCHS, help='number of epochs')
     args = vars(parser.parse_args())
 
-    # train(args)
-    print(args)
+    train(args)
