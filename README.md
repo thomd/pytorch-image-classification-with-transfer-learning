@@ -63,7 +63,10 @@ Create new [Colab Notebook](https://colab.research.google.com) and run these com
     %cd pytorch-image-classification-with-transfer-learning
     !kaggle datasets download -d imsparsh/flowers-dataset
     !unzip -qq flowers-dataset.zip -d flower-photos
+
+    !python build_dataset.py --help
     !python build_dataset.py
+
     %load_ext tensorboard
 
     %tensorboard --logdir=./runs
