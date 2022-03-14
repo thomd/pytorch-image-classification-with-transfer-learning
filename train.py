@@ -248,7 +248,7 @@ if __name__ == '__main__':
     parser.add_argument('--batch', type=int, help='batch size')
     parser.add_argument('--lr', type=float, help='learning rate')
     parser.add_argument('--epochs', type=int, default=config.EPOCHS, help=f'number of epochs (default: {config.EPOCHS})')
-    parser.add_argument('--labels', nargs='*', help='comma-separated list of labels to be used if not all')
+    parser.add_argument('--labels', nargs='*', help='list of labels to be used if not all')
     parser.add_argument('--show-labels', action='store_true', help='show lables and exit')
     args = vars(parser.parse_args())
 
