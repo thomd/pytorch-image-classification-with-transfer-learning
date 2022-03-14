@@ -87,8 +87,8 @@ def inference(args):
             plt.axis('off')
 
         # show the plot
-        plt.savefig(args['image_path'])
-        print(f'[INFO] image location: {args["image_path"]}')
+        plt.savefig(args['inferende_path'])
+        print(f'[INFO] image location: {args["inference_path"]}')
 
 
 if __name__ == '__main__':
