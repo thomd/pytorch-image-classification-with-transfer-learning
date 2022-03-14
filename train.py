@@ -110,7 +110,7 @@ def train(args):
             nn.Linear(512, 256),
             nn.ReLU(),
             nn.Dropout(0.5),
-            nn.Linear(256, len(train_dataset.classes))
+            nn.Linear(256, num_classes)
         )
         model = model.to(config.DEVICE)
 
