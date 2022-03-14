@@ -1,7 +1,6 @@
 import config
 from torchvision import models
 from torchvision import transforms
-from tqdm import tqdm
 from torch import nn
 import matplotlib.pyplot as plt
 import numpy as np
@@ -109,7 +108,7 @@ def train(args):
         writer = SummaryWriter(args['log_path'])
 
     epochs = args['epochs']
-    for epoch in tqdm(range(epochs)):
+    for epoch in range(epochs):
 
         # set the model in training mode
         model.train()
