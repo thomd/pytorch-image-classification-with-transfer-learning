@@ -241,7 +241,7 @@ def train(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Transfer Learning of a CNN.')
-    parser.add_argument('--dataset-path', type=pathlib.Path, default=config.DATASET_PATH, help='path to dataset')
+    parser.add_argument('--dataset-path', type=pathlib.Path, default=config.DATASET_PATH, help=f'path to dataset (default: {config.DATASET_PATH})')
     parser.add_argument('--type', default='fine-tuning', choices=['feature-extraction', 'fine-tuning'], help='type of transfer learning (default: fine-tuning)')
     parser.add_argument('--model', default='resnet', choices=['resnet'], help='pre-trained model')
     parser.add_argument('--optimizer', default='adam', choices=['adam', 'sgd'], help='type of optimizer (default: adam)')
