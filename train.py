@@ -60,12 +60,15 @@ def train(args):
 
     if args['labels'] != None:
         train_idxs = [i for i in range(len(train_dataset)) if train_dataset.imgs[i][1] in [train_dataset.class_to_idx.get(label) for label in args['labels']]]
-        train_loader = DataLoader(Subset(train_dataset, train_idxs), batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
+        train_dataset = Subset(train_dataset, train_idxs)
         val_idxs = [i for i in range(len(val_dataset)) if val_dataset.imgs[i][1] in [val_dataset.class_to_idx.get(label) for label in args['labels']]]
-        val_loader = DataLoader(Subset(val_dataset, val_idxs), batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
+        val_dataset = Subset(val_dataset, val_idxs)
+        num_classes = len(args['labels'])
     else:
-        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
-        val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
+        num_classes = len(train_dataset.classes)
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
 
     # load model // TODO: add other nets
     if args['model'] == 'resnet':
@@ -79,7 +82,7 @@ def train(args):
 
         # append a new classification top to our feature extractor and pop it on to the current device
         output_features = model.fc.in_features
-        model.fc = nn.Linear(output_features, len(train_dataset.classes))
+        model.fc = nn.Linear(output_features, num_classes)
         model = model.to(config.DEVICE)
 
         # initialize loss function and optimizer (notice that we are only providing the parameters of the classification top to our optimizer)
