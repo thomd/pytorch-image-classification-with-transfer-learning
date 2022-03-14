@@ -45,10 +45,12 @@ def train(args):
         transforms.Normalize(mean=config.MEAN, std=config.STD)
     ])
 
-    train_dataset = datasets.ImageFolder(root=config.TRAIN, transform=train_transforms)
+    train_image_folder = os.path.join(args['dataset_path'], config.TRAIN)
+    train_dataset = datasets.ImageFolder(root=train_image_folder, transform=train_transforms)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
 
-    val_dataset = datasets.ImageFolder(root=config.VAL, transform=val_transforms)
+    val_image_folder = os.path.join(args['dataset_path'], config.VAL)
+    val_dataset = datasets.ImageFolder(root=val_image_folder, transform=val_transforms)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
 
     # load model // TODO: add other nets
@@ -222,6 +224,7 @@ def train(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Transfer Learning of a CNN.')
+    parser.add_argument('--dataset-path', type=pathlib.Path, default=config.DATASET_PATH, help='path to dataset')
     parser.add_argument('--type', default='fine-tuning', choices=['feature-extraction', 'fine-tuning'], help='type of transfer learning')
     parser.add_argument('--model', default='resnet', choices=['resnet'], help='pre-trained model')
     parser.add_argument('--optimizer', default='adam', choices=['adam', 'sgd'], help='type of optimizer (default: adam)')

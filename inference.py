@@ -29,7 +29,7 @@ def inference(args):
     denormalize = transforms.Normalize(mean=inv_mean, std=inv_std)
 
     print('[INFO] loading the dataset...')
-    test_dataset = datasets.ImageFolder(root=config.VAL, transform=test_transforms)
+    test_dataset = datasets.ImageFolder(root=args['dataset_path'], transform=test_transforms)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
 
     # check if we have a GPU available, if so, define the map location accordingly
@@ -94,8 +94,8 @@ def inference(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Inference of Test Images', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--model', type=pathlib.Path, required=True, help='path to trained model model')
-    parser.add_argument('--test-images-path', type=pathlib.Path, default=os.path.join(config.DATASET_PATH, config.TEST), help='path to test images')
-    parser.add_argument('--inference-image-path', type=pathlib.Path, default='output/inference.png', help='path to inferences image')
+    parser.add_argument('--dataset-path', type=pathlib.Path, default=os.path.join(config.DATASET_PATH, config.TEST), help='path to dataset with test images')
+    parser.add_argument('--inference-path', type=pathlib.Path, default='output/inference.png', help='path to inferences image')
     parser.add_argument('--batch', type=int, default=config.PRED_BATCH_SIZE, help='batch size')
     args = vars(parser.parse_args())
 
