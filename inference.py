@@ -88,7 +88,7 @@ def inference(args):
 
         # show the plot
         plt.tight_layout()
-        plt.savefig(args['inferende_path'])
+        plt.savefig(args['inference_path'])
         print(f'[INFO] image location: {args["inference_path"]}')
 
 
