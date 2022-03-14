@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
+from torch.utils.data import Subset
 from torchvision import datasets
 from torch.utils.tensorboard import SummaryWriter
 import os
@@ -47,11 +48,24 @@ def train(args):
 
     train_image_folder = os.path.join(args['dataset_path'], config.TRAIN)
     train_dataset = datasets.ImageFolder(root=train_image_folder, transform=train_transforms)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
 
     val_image_folder = os.path.join(args['dataset_path'], config.VAL)
     val_dataset = datasets.ImageFolder(root=val_image_folder, transform=val_transforms)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
+
+    if args['show_labels']:
+        for label in train_dataset.class_to_idx.items():
+            name, idx = label
+            print(f'{name:>10}: {idx}')
+        return
+
+    if args['labels'] != None:
+        train_idxs = [i for i in range(len(train_dataset)) if train_dataset.imgs[i][1] in [train_dataset.class_to_idx.get(label) for label in args['labels']]]
+        train_loader = DataLoader(Subset(train_dataset, train_idxs), batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
+        val_idxs = [i for i in range(len(val_dataset)) if val_dataset.imgs[i][1] in [val_dataset.class_to_idx.get(label) for label in args['labels']]]
+        val_loader = DataLoader(Subset(val_dataset, val_idxs), batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
+    else:
+        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
+        val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
 
     # load model // TODO: add other nets
     if args['model'] == 'resnet':
@@ -234,6 +248,8 @@ if __name__ == '__main__':
     parser.add_argument('--batch', type=int, help='batch size')
     parser.add_argument('--lr', type=float, help='learning rate')
     parser.add_argument('--epochs', type=int, default=config.EPOCHS, help=f'number of epochs (default: {config.EPOCHS})')
+    parser.add_argument('--labels', nargs='*', help='comma-separated list of labels to be used if not all')
+    parser.add_argument('--show-labels', action='store_true', help='show lables and exit')
     args = vars(parser.parse_args())
 
     train(args)
