@@ -221,16 +221,16 @@ def train(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Transfer Learning of a CNN.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(description='Transfer Learning of a CNN.')
     parser.add_argument('--type', default='fine-tuning', choices=['feature-extraction', 'fine-tuning'], help='type of transfer learning')
     parser.add_argument('--model', default='resnet', choices=['resnet'], help='pre-trained model')
-    parser.add_argument('--optimizer', default='adam', choices=['adam', 'sgd'], help='type of optimizer')
+    parser.add_argument('--optimizer', default='adam', choices=['adam', 'sgd'], help='type of optimizer (default: adam)')
     parser.add_argument('--plot', default=False, type=bool, help='create image for loss/accuracy')
     parser.add_argument('--tensorboard', default=True, type=bool, help='write Tensorboard logs')
-    parser.add_argument('--log-path', type=pathlib.Path, default='./runs', help='path to Tensorboard logs')
+    parser.add_argument('--log-path', type=pathlib.Path, default='./runs', help='path to Tensorboard logs (default: ./runs)')
     parser.add_argument('--batch', type=int, help='batch size')
     parser.add_argument('--lr', type=float, help='learning rate')
-    parser.add_argument('--epochs', type=int, default=config.EPOCHS, help='number of epochs')
+    parser.add_argument('--epochs', type=int, default=config.EPOCHS, help=f'number of epochs (default: {config.EPOCHS})')
     args = vars(parser.parse_args())
 
     train(args)

@@ -48,7 +48,7 @@ def inference(args):
     batch = next(iter(test_loader))
     (images, labels) = (batch[0], batch[1])
 
-    fig = plt.figure('Results', figsize=(10, 10))
+    fig = plt.figure('Results', figsize=(10, 3))
 
     # switch off autograd
     with torch.no_grad():
@@ -89,6 +89,7 @@ def inference(args):
         # show the plot
         plt.tight_layout()
         plt.savefig(args['image_path'])
+        print(f'[INFO] image location: {args['image_path']}')
 
 
 if __name__ == '__main__':
