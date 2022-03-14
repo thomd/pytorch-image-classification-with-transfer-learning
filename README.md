@@ -6,13 +6,26 @@ Source: [PyTorch: Transfer Learning and Image Classification](https://pyimagesea
 
     python -m venv .venv
     source .venv/bin/activate
-    pip install kaggle imutils numpy torch torchvision matplotlib jupyterlab
+    pip install kaggle imutils numpy torch torchvision tensorboard matplotlib jupyterlab
 
-### Dataset
+### Image Data
+
+Image folder expects the files and directories to be constructed like:
+
+    images/cat/123.png            // label = 0
+    images/cat/cat1.png
+    images/dog/xxx.png            // label = 1
+    images/dog/xxy.png
+    images/dog/xxz.png
+
+Each class has it's own directory (cat and dog) for the images. The images are then labeled with the class taken from the directory name.
+
+### Create Dataset
 
     kaggle datasets list -s flowers
     kaggle datasets download -d imsparsh/flowers-dataset
     unzip flowers-dataset.zip -d flower-photos
+    python build_dataset.py --help
     python build_dataset.py
 
 ### Train by Feature Extraction
