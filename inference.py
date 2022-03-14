@@ -74,28 +74,28 @@ def inference(args):
 
             # grab the ground truth label
             idx = labels[i].cpu().numpy()
-            gtLabel = test_dataset.classes[idx]
+            ground_truth_label = test_dataset.classes[idx]
 
             # grab the predicted label
             pred = preds[i].argmax().cpu().numpy()
-            predLabel = test_dataset.classes[pred]
+            pred_label = test_dataset.classes[pred]
 
             # add the results and image to the plot
-            info = 'Ground Truth: {}\nPredicted: {}'.format(gtLabel, predLabel)
+            info = f'Ground Truth: {ground_truth_label}\nPredicted: {pred_label}'
             plt.imshow(image)
             plt.title(info)
             plt.axis('off')
 
         # show the plot
-        plt.tight_layout()
         plt.savefig(args['image_path'])
-        print(f'[INFO] image location: {args['image_path']}')
+        print(f'[INFO] image location: {args["image_path"]}')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Inference of Test Images', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--model', type=pathlib.Path, required=True, help='path to trained model model')
-    parser.add_argument('--image-path', type=pathlib.Path, default='output/inference.png', help='path to inference image')
+    parser.add_argument('--test-images-path', type=pathlib.Path, default=os.path.join(config.DATASET_PATH, config.TEST), help='path to test images')
+    parser.add_argument('--inference-image-path', type=pathlib.Path, default='output/inference.png', help='path to inferences image')
     parser.add_argument('--batch', type=int, default=config.PRED_BATCH_SIZE, help='batch size')
     args = vars(parser.parse_args())
 

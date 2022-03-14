@@ -10,13 +10,17 @@ Source: [PyTorch: Transfer Learning and Image Classification](https://pyimagesea
 
 ### Image Data
 
-Image folder expects the files and directories to be constructed like:
+Image folder expects the files and directories to be constructed like this:
 
-    images/cat/123.png            // label = 0
-    images/cat/cat1.png
-    images/dog/xxx.png            // label = 1
-    images/dog/xxy.png
-    images/dog/xxz.png
+    .
+    └── images
+        ├── label_1
+        │   ├── image_0.jpg
+        │   ├── image_1.jpg
+        │   └── image_2.jpg
+        └── label_2
+            ├── image_3.jpg
+            └── image_4.jpg
 
 Each class has it's own directory (cat and dog) for the images. The images are then labeled with the class taken from the directory name.
 
@@ -55,7 +59,6 @@ Create new [Colab Notebook](https://colab.research.google.com) and run these com
     !mv kaggle.json ~/.kaggle/
     !chmod 600 /root/.kaggle/kaggle.json
 
-
     !git clone https://github.com/thomd/pytorch-image-classification-with-transfer-learning.git
     %cd pytorch-image-classification-with-transfer-learning
     !kaggle datasets download -d imsparsh/flowers-dataset
@@ -63,13 +66,10 @@ Create new [Colab Notebook](https://colab.research.google.com) and run these com
     !python build_dataset.py
     %load_ext tensorboard
 
-
     %tensorboard --logdir=./runs
-
 
     !python train.py --help
     !python train.py --type fine-tuning
-
 
     !python inference.py --help
     !python inference.py --model output/finetune_model.pth
