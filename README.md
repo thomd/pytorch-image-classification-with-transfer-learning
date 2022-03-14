@@ -1,6 +1,6 @@
 # PyTorch Image Classification with Transfer Learning
 
-Source: [PyTorch: Transfer Learning and Image Classification](https://pyimagesearch.com/2021/10/11/pytorch-transfer-learning-and-image-classification/)
+[What is Transfer Learning?](https://nbviewer.jupyter.org/github/thomd/pytorch-image-classification-with-transfer-learning/blob/main/transfer-learning.ipynb)
 
 ## Local Setup
 
