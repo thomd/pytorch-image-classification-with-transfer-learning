@@ -70,20 +70,21 @@ def inference(args):
 
     # initialize metrics
     metric = torchmetrics.Accuracy()
-    # metric.to(config.DEVICE)
+    metric.to(config.DEVICE)
 
     # switch off autograd
     with torch.no_grad():
         for (batch_idx, (images, labels)) in enumerate(test_loader):
-            images = images.to(config.DEVICE)
+            images, labels = images.to(config.DEVICE), labels.to(config.DEVICE)
             preds = model(images)
 
-            pred_labels = [pred.argmax() for pred in preds.cpu()]
+            # pred_labels = [pred.argmax() for pred in preds.cpu()]
+            pred_labels = preds.max(1).indices
             acc = metric(labels, pred_labels)
 
             # save images for first batch
             if batch_idx == 0:
-                image_path = image_grid(images, np.asarray(labels), np.array(pred_labels), args['output_path'])
+                image_path = image_grid(images, np.asarray(labels.cpu()), np.array(pred_labels.cpu()), args['output_path'])
                 print(f'[INFO] image location: {image_path}')
 
     if args['show_metrics']:
