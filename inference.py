@@ -1,4 +1,5 @@
 import config
+from utils import create_image_grid
 from torchvision import transforms
 from torch.utils.data import DataLoader
 from torchvision import datasets
@@ -17,16 +18,8 @@ def inference(args):
 
     test_transforms = transforms.Compose([
         transforms.Resize((config.IMAGE_SIZE, config.IMAGE_SIZE)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=config.MEAN, std=config.STD)
+        transforms.ToTensor()
     ])
-
-    # calculate the inverse mean and standard deviation
-    inv_mean = [-m/s for (m, s) in zip(config.MEAN, config.STD)]
-    inv_std = [1/s for s in config.STD]
-
-    # define our de-normalization transform
-    denormalize = transforms.Normalize(mean=inv_mean, std=inv_std)
 
     print('[INFO] loading the dataset...')
     test_dataset = datasets.ImageFolder(root=args['dataset_path'], transform=test_transforms)
@@ -48,8 +41,6 @@ def inference(args):
     batch = next(iter(test_loader))
     (images, labels) = (batch[0], batch[1])
 
-    fig = plt.figure('Results', figsize=(10, 3))
-
     # switch off autograd
     with torch.no_grad():
 
@@ -60,43 +51,22 @@ def inference(args):
         print('[INFO] performing inference...')
         preds = model(images)
 
-        # loop over all the batch
-        for i in range(0, batch_size):
+        true_labels = np.asarray(labels)
+        pred_labels = np.array([pred.argmax() for pred in preds.cpu()])
 
-            # initalize a subplot
-            ax = plt.subplot(1, batch_size, i + 1)
+        if args['show_metrics']:
+            print(f'Truth:     {true_labels}')
+            print(f'Predicion: {pred_labels}')
 
-            # grab the image, de-normalize it, scale the raw pixel intensities to the range [0, 255], and change the channel ordering from channels first tp channels last
-            image = images[i]
-            image = denormalize(image).cpu().numpy()
-            image = (image * 255).astype('uint8')
-            image = image.transpose((1, 2, 0))
-
-            # grab the ground truth label
-            idx = labels[i].cpu().numpy()
-            ground_truth_label = test_dataset.classes[idx]
-
-            # grab the predicted label
-            pred = preds[i].argmax().cpu().numpy()
-            pred_label = test_dataset.classes[pred]
-
-            # add the results and image to the plot
-            info = f'Ground Truth: {ground_truth_label}\nPredicted: {pred_label}'
-            plt.imshow(image)
-            plt.title(info)
-            plt.axis('off')
-
-        # show the plot
-        plt.tight_layout()
-        plt.savefig(args['inference_path'])
+        create_image_grid(images, true_labels, pred_labels, args['inference_path'], nrow=8)
         print(f'[INFO] image location: {args["inference_path"]}')
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Inference of Test Images', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--model', type=pathlib.Path, required=True, help='path to trained model model')
     parser.add_argument('--dataset-path', type=pathlib.Path, default=os.path.join(config.DATASET_PATH, config.TEST), help='path to dataset with test images')
     parser.add_argument('--inference-path', type=pathlib.Path, default='output/inference.png', help='path to inferences image')
+    parser.add_argument('--show-metrics', type=bool, default=True, help='print inference metrics')
     parser.add_argument('--batch', type=int, default=config.PRED_BATCH_SIZE, help='batch size')
     args = vars(parser.parse_args())
 
