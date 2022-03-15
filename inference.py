@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader
 from torchvision import datasets
 from torchvision.utils import save_image
 from torch import nn
+import torchmetrics
 import cv2
 import math
 import numpy as np
@@ -12,7 +13,7 @@ import pathlib
 import torch
 import os
 
-def image_grid(tensor, true_labels, pred_labels, path, nrow=8, limit=None, pad=12):
+def image_grid(tensor, true_labels, pred_labels, path, nrow=5, limit=None, pad=12):
     tensor = tensor.cpu()
     if limit is not None:
         tensor = tensor[:limit, ::]
@@ -67,6 +68,9 @@ def inference(args):
     model.to(config.DEVICE)
     model.eval()
 
+    # initialize metrics
+    metric = torchmetrics.Accuracy()
+    metric.to(config.DEVICE)
     test_correct = 0
 
     # switch off autograd
@@ -77,6 +81,9 @@ def inference(args):
 
             true_labels = np.asarray(labels)
             pred_labels = np.array([pred.argmax() for pred in preds.cpu()])
+
+            acc = metric(torch.from_numpy(true_labels), torch.from_numpy(pred_labels))
+            print(f"Accuracy on batch {batch_idx}: {acc}")
             test_correct += np.sum(true_labels == pred_labels)
 
             # save images for first batch
@@ -85,6 +92,8 @@ def inference(args):
                 print(f'[INFO] image location: {image_path}')
 
     if args['show_metrics']:
+        acc = metric.compute()
+        print(f"Accuracy on all data: {acc}")
         accuracy = test_correct / len(test_dataset)
         print(f'True Positives:  TODO')
         print(f'True Negatives:  TODO')

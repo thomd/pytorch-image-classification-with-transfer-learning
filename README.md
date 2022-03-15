@@ -6,7 +6,7 @@
 
     python -m venv .venv
     source .venv/bin/activate
-    pip install kaggle imutils numpy torch torchvision tensorboard matplotlib jupyterlab
+    pip install kaggle imutils numpy torch torchvision tensorboard matplotlib jupyterlab torchmetrics
 
 ### Image Data
 
