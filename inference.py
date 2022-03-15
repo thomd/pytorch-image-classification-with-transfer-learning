@@ -70,7 +70,7 @@ def inference(args):
 
     # initialize metrics
     metric = torchmetrics.Accuracy()
-    metric.to(config.DEVICE)
+    # metric.to(config.DEVICE)
 
     # switch off autograd
     with torch.no_grad():
