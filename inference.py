@@ -2,7 +2,7 @@ import config
 from torchvision import transforms
 from torch.utils.data import DataLoader
 from torchvision import datasets
-import matplotlib.pyplot as plt
+from torchvision.utils import save_image
 from torch import nn
 import cv2
 import math
@@ -38,23 +38,20 @@ def image_grid(tensor, true_labels, pred_labels, path, nrow=8, limit=None, pad=1
             grid.narrow(1, y * height + pad, height - pad).narrow(2, x * width + pad, width - pad).copy_(t)
             k += 1
 
-    npimg = grid.numpy()
-    plt.figure(figsize=(xmaps * 2.4, ymaps * 2.4), dpi=100)
-    plt.axis('off')
-    plt.tight_layout()
-    plt.savefig(path)
+    filename = f'batch_{nmaps}.png'
+    save_image(grid, os.path.join(path, filename))
+    return filename
+
 
 def inference(args):
     batch_size = args['batch']
-
-    # torch.multiprocessing.freeze_support()
 
     test_transforms = transforms.Compose([
         transforms.Resize((config.IMAGE_SIZE, config.IMAGE_SIZE)),
         transforms.ToTensor()
     ])
 
-    print('[INFO] loading the dataset...')
+    print('[INFO] loading the test dataset...')
     test_dataset = datasets.ImageFolder(root=args['dataset_path'], transform=test_transforms)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
 
@@ -70,35 +67,37 @@ def inference(args):
     model.to(config.DEVICE)
     model.eval()
 
-    # grab a batch of test data
-    batch = next(iter(test_loader))
-    (images, labels) = (batch[0], batch[1])
+    test_correct = 0
 
     # switch off autograd
     with torch.no_grad():
+        for (batch_idx, (images, labels)) in enumerate(test_loader):
+            print(batch_idx)
+            images = images.to(config.DEVICE)
+            preds = model(images)
 
-        # send the images to the device
-        images = images.to(config.DEVICE)
+            true_labels = np.asarray(labels)
+            pred_labels = np.array([pred.argmax() for pred in preds.cpu()])
+            print(type(true_labels))
+            print(type(pred_labels))
+            test_correct += np.sum(true_labels == pred_labels)
 
-        # make the predictions
-        print('[INFO] performing inference...')
-        preds = model(images)
+            # save images for first batch
+            if batch_idx == 1:
+                image_path = image_grid(images, true_labels, pred_labels, args['output_path'], nrow=8)
+                print(f'[INFO] image location: {image_path}')
 
-        true_labels = np.asarray(labels)
-        pred_labels = np.array([pred.argmax() for pred in preds.cpu()])
+    if args['show_metrics']:
+        accuracy = test_correct / len(test_dataset)
+        print(f'Accuracy: {accuracy:.3f}')
 
-        if args['show_metrics']:
-            print(f'Truth:     {true_labels}')
-            print(f'Predicion: {pred_labels}')
-
-        image_grid(images, true_labels, pred_labels, args['inference_path'], nrow=8)
-        print(f'[INFO] image location: {args["inference_path"]}')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Inference of Test Images', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--model', type=pathlib.Path, required=True, help='path to trained model model')
-    parser.add_argument('--dataset-path', type=pathlib.Path, default=os.path.join(config.DATASET_PATH, config.TEST), help='path to dataset with test images')
-    parser.add_argument('--inference-path', type=pathlib.Path, default='output/inference.png', help='path to inferences image')
+    parser.add_argument('--dataset-path', type=pathlib.Path, default=os.path.join(config.DATASET_PATH, config.TEST), help='path to test dataset')
+    parser.add_argument('--output-path', type=pathlib.Path, default='output', help='output path')
+    parser.add_argument('--image-path', type=pathlib.Path, help='path to test images instead of batch')
     parser.add_argument('--show-metrics', type=bool, default=True, help='print inference metrics')
     parser.add_argument('--batch', type=int, default=config.PRED_BATCH_SIZE, help='batch size')
     args = vars(parser.parse_args())

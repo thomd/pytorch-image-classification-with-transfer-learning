@@ -4,7 +4,7 @@ from torchvision.transforms import transforms
 import matplotlib.pyplot as plt
 import cv2
 
-def create_image_grid(tensor, true_labels, pred_labels, path, nrow=8, limit=None, pad=12):
+def image_grid(tensor, true_labels, pred_labels, path, nrow=8, limit=None, pad=12):
     tensor = tensor.cpu()
     if limit is not None:
         tensor = tensor[:limit, ::]
