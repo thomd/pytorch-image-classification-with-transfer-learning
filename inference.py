@@ -5,6 +5,7 @@ from torch.utils.data import DataLoader
 from torchvision import datasets
 import matplotlib.pyplot as plt
 from torch import nn
+import numpy as np
 import argparse
 import pathlib
 import torch
