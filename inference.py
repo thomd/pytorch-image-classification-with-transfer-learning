@@ -71,7 +71,6 @@ def inference(args):
     # initialize metrics
     metric = torchmetrics.Accuracy()
     metric.to(config.DEVICE)
-    test_correct = 0
 
     # switch off autograd
     with torch.no_grad():
@@ -79,27 +78,21 @@ def inference(args):
             images = images.to(config.DEVICE)
             preds = model(images)
 
-            true_labels = np.asarray(labels)
-            pred_labels = np.array([pred.argmax() for pred in preds.cpu()])
-
-            acc = metric(torch.from_numpy(true_labels), torch.from_numpy(pred_labels))
-            print(f"Accuracy on batch {batch_idx}: {acc}")
-            test_correct += np.sum(true_labels == pred_labels)
+            pred_labels = [pred.argmax() for pred in preds.cpu()]
+            acc = metric(labels, pred_labels)
 
             # save images for first batch
             if batch_idx == 0:
-                image_path = image_grid(images, true_labels, pred_labels, args['output_path'], nrow=8)
+                image_path = image_grid(images, np.asarray(labels), np.array(pred_labels), args['output_path'])
                 print(f'[INFO] image location: {image_path}')
 
     if args['show_metrics']:
         acc = metric.compute()
-        print(f"Accuracy on all data: {acc}")
-        accuracy = test_correct / len(test_dataset)
+        print(f"Accuracy on all data: {acc:.3f}")
         print(f'True Positives:  TODO')
         print(f'True Negatives:  TODO')
         print(f'False Positives: TODO')
         print(f'False Negatives: TODO')
-        print(f'Accuracy:        {accuracy:.3f}')
 
 
 if __name__ == '__main__':

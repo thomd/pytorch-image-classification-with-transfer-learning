@@ -52,7 +52,7 @@ Create new [Colab Notebook](https://colab.research.google.com) and run these com
 
     %cd /content
     !nvidia-smi
-    !pip install -q kaggle
+    !pip install -q kaggle torchmetrics
     from google.colab import files
     uploaded = files.upload()
     !mkdir ~/.kaggle
