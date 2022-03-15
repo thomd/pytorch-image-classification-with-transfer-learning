@@ -72,24 +72,25 @@ def inference(args):
     # switch off autograd
     with torch.no_grad():
         for (batch_idx, (images, labels)) in enumerate(test_loader):
-            print(batch_idx)
             images = images.to(config.DEVICE)
             preds = model(images)
 
             true_labels = np.asarray(labels)
             pred_labels = np.array([pred.argmax() for pred in preds.cpu()])
-            print(type(true_labels))
-            print(type(pred_labels))
             test_correct += np.sum(true_labels == pred_labels)
 
             # save images for first batch
-            if batch_idx == 1:
+            if batch_idx == 0:
                 image_path = image_grid(images, true_labels, pred_labels, args['output_path'], nrow=8)
                 print(f'[INFO] image location: {image_path}')
 
     if args['show_metrics']:
         accuracy = test_correct / len(test_dataset)
-        print(f'Accuracy: {accuracy:.3f}')
+        print(f'True Positives:  TODO')
+        print(f'True Negatives:  TODO')
+        print(f'False Positives: TODO')
+        print(f'False Negatives: TODO')
+        print(f'Accuracy:        {accuracy:.3f}')
 
 
 if __name__ == '__main__':
