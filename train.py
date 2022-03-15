@@ -53,9 +53,10 @@ def train(args):
     val_dataset = datasets.ImageFolder(root=val_image_folder, transform=val_transforms)
 
     if args['show_labels']:
+        print(f'{"NAME":<12}  {idx}')
         for label in train_dataset.class_to_idx.items():
             name, idx = label
-            print(f'{name:>10}: {idx}')
+            print(f'{name:<12}: {idx}')
         return
 
     if args['labels'] != None:
@@ -246,7 +247,7 @@ if __name__ == '__main__':
     parser.add_argument('--model', default='resnet', choices=['resnet'], help='pre-trained model')
     parser.add_argument('--optimizer', default='adam', choices=['adam', 'sgd'], help='type of optimizer (default: adam)')
     parser.add_argument('--plot', default=False, type=bool, help='create image for loss/accuracy')
-    parser.add_argument('--tensorboard', default=True, type=bool, help='write Tensorboard logs')
+    parser.add_argument('--tensorboard', default=True, type=bool, help='write Tensorboard logs (default: True)')
     parser.add_argument('--log-path', type=pathlib.Path, default='./runs', help='path to Tensorboard logs (default: ./runs)')
     parser.add_argument('--batch', type=int, help='batch size')
     parser.add_argument('--lr', type=float, help='learning rate')
