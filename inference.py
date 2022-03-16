@@ -78,7 +78,6 @@ def inference(args):
             images, labels = images.to(config.DEVICE), labels.to(config.DEVICE)
             preds = model(images)
 
-            # pred_labels = [pred.argmax() for pred in preds.cpu()]
             pred_labels = preds.max(1).indices
             acc = metric(labels, pred_labels)
 
@@ -89,7 +88,7 @@ def inference(args):
 
     if args['show_metrics']:
         acc = metric.compute()
-        print(f"Accuracy on all data: {acc:.3f}")
+        print(f"Accuracy:        {acc:.3f}")
         print(f'True Positives:  TODO')
         print(f'True Negatives:  TODO')
         print(f'False Positives: TODO')
