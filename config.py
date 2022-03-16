@@ -22,12 +22,3 @@ PRED_BATCH_SIZE = 10
 EPOCHS = 100
 LR = 0.001
 LR_FINETUNE = 0.0005
-
-OUTPUT_PATH = 'output'
-
-FEATURE_EXTRACTION_PLOT = os.path.join(OUTPUT_PATH, 'feature_extraction.png')
-FEATURE_EXTRACTION_MODEL = os.path.join(OUTPUT_PATH, 'feature_extraction_model.pth')
-
-FINETUNE_PLOT = os.path.join(OUTPUT_PATH, 'finetune.png')
-FINETUNE_MODEL = os.path.join(OUTPUT_PATH, 'finetune_model.pth')
-

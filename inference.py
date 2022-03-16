@@ -13,7 +13,7 @@ import pathlib
 import torch
 import os
 
-def image_grid(tensor, true_labels, pred_labels, path, nrow=5, limit=None, pad=12):
+def image_grid(tensor, true_labels, pred_labels, path, nrow=8, limit=None, pad=12):
     tensor = tensor.cpu()
     if limit is not None:
         tensor = tensor[:limit, ::]

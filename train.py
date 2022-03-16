@@ -10,9 +10,27 @@ from torch.utils.data import Subset
 from torchvision import datasets
 from torch.utils.tensorboard import SummaryWriter
 import os
+import re
 import time
 import argparse
 import pathlib
+
+
+def create_exeriment_path(base_path, *params):
+    dirpath = pathlib.Path(base_path)
+    experiments = [0]
+    for exp in dirpath.iterdir():
+        if exp.is_dir():
+            m = re.match(r'.*\/exp([0-9]+)', str(exp))
+            if bool(m):
+                experiments.append(int(m.groups()[0]))
+
+    exp_n = np.max(experiments) + 1
+    exp_path = f'{base_path}/exp{exp_n:03d}'
+    for param in params:
+        exp_path += f'_{str(param)}'
+    return exp_path
+
 
 def train(args):
     if args['batch'] != None:
@@ -136,8 +154,10 @@ def train(args):
     print(f'[INFO] batch size:    {batch_size}')
     print(f'[INFO] learning rate: {lr}')
     start_time = time.time()
+    experiment_path = create_exeriment_path(args['results_path'], args['model'], args['type'], batch_size, lr)
+
     if args['tensorboard']:
-        writer = SummaryWriter(args['log_path'])
+        writer = SummaryWriter(experiment_path)
 
     epochs = args['epochs']
     for epoch in range(epochs):
@@ -234,10 +254,11 @@ def train(args):
         plt.xlabel('Epoch')
         plt.ylabel('Loss / Accuracy')
         plt.legend()
-        plt.savefig(config.FEATURE_EXTRACTION_PLOT)
+        plt.savefig(os.path.join(args['results_path'], 'accuracy_loss.png'))
 
     # serialize the model to disk
-    torch.save(model, config.FEATURE_EXTRACTION_MODEL)
+    # TODO: save best model in each epoch
+    torch.save(model, os.path.join(args['results_path'], 'model.pth'))
 
 
 if __name__ == '__main__':
@@ -248,7 +269,7 @@ if __name__ == '__main__':
     parser.add_argument('--optimizer', default='adam', choices=['adam', 'sgd'], help='type of optimizer (default: adam)')
     parser.add_argument('--plot', default=False, type=bool, help='create image for loss/accuracy')
     parser.add_argument('--tensorboard', default=True, type=bool, help='write Tensorboard logs (default: True)')
-    parser.add_argument('--log-path', type=pathlib.Path, default='./runs', help='path to Tensorboard logs (default: ./runs)')
+    parser.add_argument('--results-path', type=pathlib.Path, default='./results', help='path to models and logs (default: ./results)')
     parser.add_argument('--batch', type=int, help='batch size')
     parser.add_argument('--lr', type=float, help='learning rate')
     parser.add_argument('--epochs', type=int, default=config.EPOCHS, help=f'number of epochs (default: {config.EPOCHS})')
