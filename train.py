@@ -155,6 +155,8 @@ def train(args):
     print(f'[INFO] learning rate: {lr}')
     start_time = time.time()
     experiment_path = create_exeriment_path(args['results_path'], args['model'], args['type'], batch_size, lr)
+    print(f'[INFO] experiment:    {experiment_path}')
+    print('')
 
     if args['tensorboard']:
         writer = SummaryWriter(experiment_path)

@@ -88,11 +88,13 @@ def inference(args):
 
     if args['show_metrics']:
         acc = metric.compute()
-        print(f"Accuracy:        {acc:.3f}")
+        print(f"\nAccuracy:        {acc:.3f}")
         print(f'True Positives:  TODO')
         print(f'True Negatives:  TODO')
         print(f'False Positives: TODO')
         print(f'False Negatives: TODO')
+        print(f'Precision:       TODO')
+        print(f'Recall:          TODO')
 
 
 if __name__ == '__main__':
