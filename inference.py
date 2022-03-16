@@ -52,7 +52,10 @@ def inference(args):
         transforms.ToTensor()
     ])
 
-    print('[INFO] loading the test dataset...')
+    print('[INFO] loading the test dataset ...')
+    print(args['seed'])
+    if args['seed']:
+        torch.manual_seed(args['seed'])
     test_dataset = datasets.ImageFolder(root=args['dataset_path'], transform=test_transforms)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
 
@@ -106,7 +109,7 @@ def inference(args):
         precision = metric_precision.compute()
         print(f'Precision:       {precision[1]:.3f}')
         recall = metric_recall.compute()
-        print(f'Recall:          {recall:.3f}')
+        print(f'Recall:          {recall[1]:.3f}')
 
 
 if __name__ == '__main__':
@@ -117,6 +120,7 @@ if __name__ == '__main__':
     parser.add_argument('--image-path', type=pathlib.Path, help='path to test images instead of batch')
     parser.add_argument('--show-metrics', type=bool, default=True, help='print inference metrics')
     parser.add_argument('--batch', type=int, default=config.PRED_BATCH_SIZE, help='batch size')
+    parser.add_argument('--seed', type=int, default=None, help='seed for randomizing data-loader (default: None)')
     args = vars(parser.parse_args())
 
     inference(args)
