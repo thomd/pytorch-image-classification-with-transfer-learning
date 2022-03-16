@@ -69,8 +69,14 @@ def inference(args):
     model.eval()
 
     # initialize metrics
-    metric = torchmetrics.Accuracy()
-    metric.to(config.DEVICE)
+    metric_acc = torchmetrics.Accuracy()
+    metric_acc.to(config.DEVICE)
+    metric_confmat = torchmetrics.ConfusionMatrix(num_classes=2)
+    metric_confmat.to(config.DEVICE)
+    metric_precision = torchmetrics.Precision(average='none', num_classes=2)
+    metric_precision.to(config.DEVICE)
+    metric_recall = torchmetrics.Recall(average='none', num_classes=2)
+    metric_recall.to(config.DEVICE)
 
     # switch off autograd
     with torch.no_grad():
@@ -79,7 +85,10 @@ def inference(args):
             preds = model(images)
 
             pred_labels = preds.max(1).indices
-            acc = metric(labels, pred_labels)
+            acc = metric_acc(labels, pred_labels)
+            confmat = metric_confmat(labels, pred_labels)
+            precision = metric_precision(labels, pred_labels)
+            recall = metric_recall(labels, pred_labels)
 
             # save images for first batch
             if batch_idx == 0:
@@ -87,14 +96,17 @@ def inference(args):
                 print(f'[INFO] image location: {image_path}')
 
     if args['show_metrics']:
-        acc = metric.compute()
+        acc = metric_acc.compute()
         print(f"\nAccuracy:        {acc:.3f}")
-        print(f'True Positives:  TODO')
-        print(f'True Negatives:  TODO')
-        print(f'False Positives: TODO')
-        print(f'False Negatives: TODO')
-        print(f'Precision:       TODO')
-        print(f'Recall:          TODO')
+        confmat = metric_confmat.compute()
+        print(f'True Positives:  {confmat[1, 1]}')
+        print(f'True Negatives:  {confmat[0, 0]}')
+        print(f'False Positives: {confmat[0, 1]}')
+        print(f'False Negatives: {confmat[1, 0]}')
+        precision = metric_precision.compute()
+        print(f'Precision:       {precision[1]:.3f}')
+        recall = metric_recall.compute()
+        print(f'Recall:          {recall:.3f}')
 
 
 if __name__ == '__main__':
