@@ -22,7 +22,7 @@ Image folder expects the files and directories to be constructed like this:
             ├── image_3.jpg
             └── image_4.jpg
 
-Each class has it's own directory (cat and dog) for the images. The images are then labeled with the class taken from the directory name.
+Each class has it's own directory for the images. The images are then labeled with the class taken from the directory name.
 
 ### Create Dataset
 
@@ -69,12 +69,13 @@ Create new [Colab Notebook](https://colab.research.google.com) and run these com
 
     %load_ext tensorboard
 
-    %tensorboard --logdir=./runs
+    %tensorboard --logdir=./results
 
     !python train.py --help
     !python train.py --type fine-tuning
 
     !python inference.py --help
-    !python inference.py --model output/finetune_model.pth
+    !python inference.py --model /path/to/model.pth
+
     from IPython.display import Image
-    display(Image('output/inference.png'))
+    display(Image('/path/to/iamge.png'))
