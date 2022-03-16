@@ -254,11 +254,11 @@ def train(args):
         plt.xlabel('Epoch')
         plt.ylabel('Loss / Accuracy')
         plt.legend()
-        plt.savefig(os.path.join(args['results_path'], 'accuracy_loss.png'))
+        plt.savefig(os.path.join(args['results_path'], experiment_path, 'accuracy_loss.png'))
 
     # serialize the model to disk
     # TODO: save best model in each epoch
-    torch.save(model, os.path.join(args['results_path'], 'model.pth'))
+    torch.save(model, os.path.join(args['results_path'], experiment_path, 'model.pth'))
 
 
 if __name__ == '__main__':
