@@ -10,10 +10,6 @@ TRAIN = 'train'
 VAL = 'val'
 TEST = 'test'
 
-MEAN = [0.485, 0.456, 0.406]
-STD = [0.229, 0.224, 0.225]
-IMAGE_SIZE = 224
-
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 FEATURE_EXTRACTION_BATCH_SIZE = 256
