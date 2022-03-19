@@ -6,7 +6,7 @@
 
     python -m venv .venv
     source .venv/bin/activate
-    pip install kaggle imutils numpy torch torchvision tensorboard matplotlib jupyterlab torchmetrics
+    pip install kaggle imutils numpy torch torchvision tensorboard matplotlib jupyterlab torchmetrics albumentations
 
 ### Image Data
 
@@ -52,7 +52,7 @@ Create new [Colab Notebook](https://colab.research.google.com) and run these com
 
     %cd /content
     !nvidia-smi
-    !pip install -q kaggle torchmetrics
+    !pip install -q kaggle torchmetrics albumentations==1.1.0 opencv-python-headless==4.2.0.34
     from google.colab import files
     uploaded = files.upload()
     !mkdir ~/.kaggle

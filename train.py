@@ -8,7 +8,10 @@ import torch
 from torch.utils.data import DataLoader
 from torch.utils.data import Subset
 from torchvision import datasets
+from torchvision.utils import make_grid
 from torch.utils.tensorboard import SummaryWriter
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
 import os
 import re
 import time
@@ -47,28 +50,29 @@ def train(args):
     else:
         lr = config.LR
 
-    # torch.multiprocessing.set_sharing_strategy('file_system')
-    # torch.multiprocessing.freeze_support()
-
-    train_transforms = transforms.Compose([
-        transforms.RandomResizedCrop(config.IMAGE_SIZE),
-        transforms.RandomHorizontalFlip(),
-        transforms.RandomRotation(90),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=config.MEAN, std=config.STD)
+    train_transforms = A.Compose([
+        A.Resize(256, 256),
+        A.RandomCrop(224, 224),
+        A.HorizontalFlip(p=0.5),
+        #A.VerticalFlip(p=0.5),
+        A.Perspective(scale=(0.1, 0.1), fit_output=False, p=0.5),
+        A.Sharpen(alpha=(0.2, 0.5), lightness=(0.5, 1.0), p=0.5),
+        A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ToTensorV2(),
     ])
 
-    val_transforms = transforms.Compose([
-        transforms.Resize((config.IMAGE_SIZE, config.IMAGE_SIZE)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=config.MEAN, std=config.STD)
+    val_transforms = A.Compose([
+        A.Resize(256, 256),
+        A.RandomCrop(224, 224),
+        A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ToTensorV2(),
     ])
 
     train_image_folder = os.path.join(args['dataset_path'], config.TRAIN)
-    train_dataset = datasets.ImageFolder(root=train_image_folder, transform=train_transforms)
+    train_dataset = datasets.ImageFolder(root=train_image_folder, transform=lambda img:train_transforms(image=np.array(img))['image'])
 
     val_image_folder = os.path.join(args['dataset_path'], config.VAL)
-    val_dataset = datasets.ImageFolder(root=val_image_folder, transform=val_transforms)
+    val_dataset = datasets.ImageFolder(root=val_image_folder, transform=lambda img:val_transforms(image=np.array(img))['image'])
 
     if args['show_labels']:
         print(f'{"NAME":<14} INDEX')
@@ -77,14 +81,15 @@ def train(args):
             print(f'{name:<14} {idx}')
         return
 
-    if args['labels'] != None:
-        train_idxs = [i for i in range(len(train_dataset)) if train_dataset.imgs[i][1] in [train_dataset.class_to_idx.get(label) for label in args['labels']]]
-        train_dataset = Subset(train_dataset, train_idxs)
-        val_idxs = [i for i in range(len(val_dataset)) if val_dataset.imgs[i][1] in [val_dataset.class_to_idx.get(label) for label in args['labels']]]
-        val_dataset = Subset(val_dataset, val_idxs)
-        num_classes = len(args['labels'])
-    else:
-        num_classes = len(train_dataset.classes)
+    if args['show_images']:
+        batch = next(iter(train_loader))
+        plt.figure(figsize=(15, 5))
+        plt.imshow(transforms.ToPILImage()(make_grid(batch)))
+        plt.axis('off')
+        plt.show()
+        return
+
+    num_classes = len(train_dataset.classes)
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
@@ -275,8 +280,8 @@ if __name__ == '__main__':
     parser.add_argument('--batch', type=int, help='batch size')
     parser.add_argument('--lr', type=float, help='learning rate')
     parser.add_argument('--epochs', type=int, default=config.EPOCHS, help=f'number of epochs (default: {config.EPOCHS})')
-    parser.add_argument('--labels', nargs='*', help='list of labels to be used if not all')
     parser.add_argument('--show-labels', action='store_true', help='show lables and exit')
+    parser.add_argument('--show-images', action='store_true', help='show one batch augmented training images and exit')
     args = vars(parser.parse_args())
 
     train(args)
