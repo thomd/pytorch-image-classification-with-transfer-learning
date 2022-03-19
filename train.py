@@ -81,6 +81,11 @@ def train(args):
             print(f'{name:<14} {idx}')
         return
 
+    num_classes = len(train_dataset.classes)
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
+
     if args['show_images']:
         batch = next(iter(train_loader))
         plt.figure(figsize=(15, 5))
@@ -88,11 +93,6 @@ def train(args):
         plt.axis('off')
         plt.show()
         return
-
-    num_classes = len(train_dataset.classes)
-
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
 
     # load model // TODO: add other nets
     if args['model'] == 'resnet':
