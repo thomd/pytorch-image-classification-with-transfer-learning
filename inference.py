@@ -14,7 +14,8 @@ import torch
 import os
 
 def image_grid(tensor, true_labels, pred_labels, path, nrow=8, limit=None, pad=12):
-    tensor = tensor.cpu()
+    deNormalize = transforms.Normalize(mean=[-2.118, -2.036, -1.804], std=[4.367, 4.464, 4.444])
+    tensor = deNormalize(tensor).cpu()
     if limit is not None:
         tensor = tensor[:limit, ::]
         true_labels = true_labels[:limit]
@@ -49,12 +50,13 @@ def inference(args):
 
     test_transforms = transforms.Compose([
         transforms.Resize((224, 224)),
+        transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        transforms.ToTensor()
     ])
 
     print('[INFO] loading the test dataset ...')
-    test_dataset = datasets.ImageFolder(root=args['dataset_path'], transform=test_transforms)
+    test_image_folder = os.path.join(args['dataset_path'], config.TEST)
+    test_dataset = datasets.ImageFolder(root=test_image_folder, transform=test_transforms)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == 'cuda' else False)
 
     # check if we have a GPU available, if so, define the map location accordingly
@@ -82,7 +84,7 @@ def inference(args):
     # switch off autograd
     with torch.no_grad():
         for (batch_idx, (images, labels)) in enumerate(test_loader):
-            images, labels = images.to(config.DEVICE), labels.to(config.DEVICE)
+            (images, labels) = (images.to(config.DEVICE), labels.to(config.DEVICE))
             preds = model(images)
 
             pred_labels = preds.max(1).indices
@@ -113,7 +115,7 @@ def inference(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Inference of Test Images', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--model', type=pathlib.Path, required=True, help='path to trained model model')
-    parser.add_argument('--dataset-path', type=pathlib.Path, default=os.path.join(config.DATASET_PATH, config.TEST), help='path to test dataset')
+    parser.add_argument('--dataset-path', type=pathlib.Path, default=os.path.join(config.DATASET_PATH), help='path to test dataset')
     parser.add_argument('--output-path', type=pathlib.Path, default='output', help='output path')
     parser.add_argument('--image-path', type=pathlib.Path, help='path to test images instead of batch')
     parser.add_argument('--show-metrics', type=bool, default=True, help='print inference metrics')
