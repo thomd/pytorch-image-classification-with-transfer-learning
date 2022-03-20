@@ -61,11 +61,17 @@ def train(args):
         ToTensorV2(),
     ])
 
-    val_transforms = A.Compose([
-        A.Resize(256, 256),
-        A.RandomCrop(224, 224),
-        A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ToTensorV2(),
+    # val_transforms = A.Compose([
+        # A.Resize(256, 256),
+        # A.RandomCrop(224, 224),
+        # A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        # ToTensorV2(),
+    # ])
+
+    val_transforms = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
 
     train_image_folder = os.path.join(args['dataset_path'], config.TRAIN)
@@ -179,6 +185,7 @@ def train(args):
         # initialize the number of correct predictions in the training and validation step
         train_correct = 0
         val_correct = 0
+        best_val_correct = 0
 
         # loop over the training set
         for (batch_idx, (X, y)) in enumerate(train_loader):
@@ -229,6 +236,11 @@ def train(args):
         train_correct = train_correct / len(train_dataset)
         val_correct = val_correct / len(val_dataset)
 
+        # serialize the model to disk
+        if val_correct > best_val_correct:
+            best_val_correct = val_correct
+            torch.save(model, os.path.join(args['results_path'], experiment_path, 'best_model.pth'))
+
         # update our training history
         log['train_loss'].append(avg_train_loss)
         log['train_acc'].append(train_correct)
@@ -263,9 +275,6 @@ def train(args):
         plt.legend()
         plt.savefig(os.path.join(args['results_path'], experiment_path, 'accuracy_loss.png'))
 
-    # serialize the model to disk
-    # TODO: save best model in each epoch
-    torch.save(model, os.path.join(args['results_path'], experiment_path, 'model.pth'))
 
 
 if __name__ == '__main__':
