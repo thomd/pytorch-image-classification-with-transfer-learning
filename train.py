@@ -90,13 +90,14 @@ def train(args):
 
     num_classes = len(train_dataset.classes)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == 'cuda' else False)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == 'cuda' else False)
 
     if args['show_images']:
-        (batch, _) = next(iter(train_loader))
+        (batch, _) = next(iter(DataLoader(train_dataset, batch_size=16, shuffle=True)))
+        deNormalize = transforms.Normalize(mean=[-2.118, -2.036, -1.804], std=[4.367, 4.464, 4.444])
         plt.figure(figsize=(15, 5))
-        plt.imshow(transforms.ToPILImage()(make_grid(batch)))
+        plt.imshow(transforms.ToPILImage()(make_grid(deNormalize(batch))))
         plt.axis('off')
         image_path = os.path.join(args['output_path'], 'train_images.jpg')
         print(f'[INFO] image location: {image_path}')
