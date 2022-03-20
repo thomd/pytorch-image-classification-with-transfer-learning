@@ -278,7 +278,7 @@ def train(args):
         plt.xlabel('Epoch')
         plt.ylabel('Loss / Accuracy')
         plt.legend()
-        plt.savefig(os.path.join(args[experiment_path, 'accuracy_loss.png'))
+        plt.savefig(os.path.join(experiment_path, 'accuracy_loss.png'))
 
 
 

@@ -6,9 +6,10 @@ We use the [Flowers Dataset](https://www.kaggle.com/datasets/imsparsh/flowers-da
 
 ## Local Setup
 
+    pyenv shell 3.9.10
     python -m venv .venv
     source .venv/bin/activate
-    pip install kaggle imutils numpy torch torchvision tensorboard matplotlib jupyterlab torchmetrics albumentations
+    pip install -r requirements.txt
 
 ### Image Data
 
