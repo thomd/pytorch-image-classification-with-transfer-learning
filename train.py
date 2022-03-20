@@ -289,7 +289,7 @@ if __name__ == '__main__':
     parser.add_argument('--model', default='resnet', choices=['resnet'], help='pre-trained model')
     parser.add_argument('--optimizer', default='adam', choices=['adam', 'sgd'], help='type of optimizer (default: adam)')
     parser.add_argument('--plot', default=False, action='store_false', help='create image for loss/accuracy (default: False)')
-    parser.add_argument('--tensorboard', action='store_true', help='write Tensorboard logs (default: True)')
+    parser.add_argument('--tensorboard', action='store_true', default=True, help='write Tensorboard logs (default: True)')
     parser.add_argument('--results-path', type=pathlib.Path, default='./results', metavar='PATH', help='path to models and logs (default: ./results)')
     parser.add_argument('--batch', type=int, help='batch size')
     parser.add_argument('--lr', type=float, help='learning rate')
