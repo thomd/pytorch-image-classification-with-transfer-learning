@@ -244,7 +244,7 @@ def train(args):
         # serialize the model to disk
         if val_correct > best_val_correct:
             best_val_correct = val_correct
-            torch.save(model, os.path.join(args['results_path'], experiment_path, 'best_model.pth'))
+            torch.save(model, os.path.join(experiment_path, 'best_model.pth'))
 
         # update our training history
         log['train_loss'].append(avg_train_loss)
@@ -296,7 +296,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=config.EPOCHS, help=f'number of epochs (default: {config.EPOCHS})')
     parser.add_argument('--show-labels', action='store_true', help='show lables and exit')
     parser.add_argument('--show-images', action='store_true', help='show one batch of augmented training images and exit')
-    parser.add_argument('--output-path', type=pathlib.Path, default='output', help='output path for images and plots')
+    parser.add_argument('--output-path', type=pathlib.Path, default='output', metavar='PATH', help='output path for images and plots')
     args = vars(parser.parse_args())
 
     train(args)
