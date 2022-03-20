@@ -1,6 +1,8 @@
 # PyTorch Image Classification with Transfer Learning
 
-[What is Transfer Learning?](https://nbviewer.jupyter.org/github/thomd/pytorch-image-classification-with-transfer-learning/blob/main/transfer-learning.ipynb)
+In this experiment we train an image classifier using [transfer learning?](https://nbviewer.jupyter.org/github/thomd/pytorch-image-classification-with-transfer-learning/blob/main/transfer-learning.ipynb) of the pre-trained convolutional neural network **ResNet-50**.
+
+We use the [Flowers Dataset](https://www.kaggle.com/datasets/imsparsh/flowers-dataset/) to train the model.
 
 ## Local Setup
 
