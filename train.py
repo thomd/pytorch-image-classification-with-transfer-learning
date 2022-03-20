@@ -20,6 +20,7 @@ import pathlib
 
 
 def create_exeriment_path(base_path, *params):
+    os.makedirs(base_path, exist_ok=True)
     dirpath = pathlib.Path(base_path)
     experiments = [0]
     for exp in dirpath.iterdir():
@@ -96,7 +97,7 @@ def train(args):
     if args['show_images']:
         (batch, _) = next(iter(DataLoader(train_dataset, batch_size=16, shuffle=True)))
         deNormalize = transforms.Normalize(mean=[-2.118, -2.036, -1.804], std=[4.367, 4.464, 4.444])
-        plt.figure(figsize=(15, 5))
+        plt.figure(figsize=(14, 4))
         plt.imshow(transforms.ToPILImage()(make_grid(deNormalize(batch))))
         plt.axis('off')
         image_path = os.path.join(args['output_path'], 'train_images.jpg')
