@@ -1,7 +1,7 @@
 import torch
 import os
 
-IMAGES_PATH = 'flower-photos/train'
+IMAGES_PATH = 'images'
 DATASET_PATH = 'dataset'
 
 TEST_SPLIT = 0.1
