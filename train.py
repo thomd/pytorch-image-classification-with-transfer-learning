@@ -100,7 +100,7 @@ def train(args):
         plt.axis('off')
         image_path = os.path.join(args['output_path'], 'train_images.jpg')
         print(f'[INFO] image location: {image_path}')
-        plt.savefig('')
+        plt.savefig(image_path)
         return
 
     # load model // TODO: add other nets
