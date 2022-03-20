@@ -20,7 +20,6 @@ import pathlib
 
 
 def create_exeriment_path(base_path, *params):
-    os.makedirs(base_path, exist_ok=True)
     dirpath = pathlib.Path(base_path)
     experiments = [0]
     for exp in dirpath.iterdir():
@@ -33,6 +32,7 @@ def create_exeriment_path(base_path, *params):
     exp_path = f'{base_path}/exp{exp_n:03d}'
     for param in params:
         exp_path += f'_{str(param)}'
+    os.makedirs(exp_path, exist_ok=True)
     return exp_path
 
 
