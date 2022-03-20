@@ -98,7 +98,9 @@ def train(args):
         plt.figure(figsize=(15, 5))
         plt.imshow(transforms.ToPILImage()(make_grid(batch)))
         plt.axis('off')
-        plt.show()
+        image_path = os.path.join(args['output_path'], 'train_images.jpg')
+        print(f'[INFO] image location: {image_path}')
+        plt.savefig('')
         return
 
     # load model // TODO: add other nets
@@ -291,7 +293,8 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, help='learning rate')
     parser.add_argument('--epochs', type=int, default=config.EPOCHS, help=f'number of epochs (default: {config.EPOCHS})')
     parser.add_argument('--show-labels', action='store_true', help='show lables and exit')
-    parser.add_argument('--show-images', action='store_true', help='show one batch augmented training images and exit')
+    parser.add_argument('--show-images', action='store_true', help='show one batch of augmented training images and exit')
+    parser.add_argument('--output-path', type=pathlib.Path, default='output', help='output path for images and plots')
     args = vars(parser.parse_args())
 
     train(args)
