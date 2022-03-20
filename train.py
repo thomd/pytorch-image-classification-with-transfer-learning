@@ -94,7 +94,7 @@ def train(args):
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
 
     if args['show_images']:
-        batch = next(iter(train_loader))
+        (batch, _) = next(iter(train_loader))
         plt.figure(figsize=(15, 5))
         plt.imshow(transforms.ToPILImage()(make_grid(batch)))
         plt.axis('off')
@@ -280,13 +280,13 @@ def train(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Transfer Learning of a CNN.')
-    parser.add_argument('--dataset-path', type=pathlib.Path, default=config.DATASET_PATH, help=f'path to dataset (default: {config.DATASET_PATH})')
+    parser.add_argument('--dataset-path', type=pathlib.Path, default=config.DATASET_PATH, metavar='PATH', help=f'path to dataset (default: {config.DATASET_PATH})')
     parser.add_argument('--type', default='fine-tuning', choices=['feature-extraction', 'fine-tuning'], help='type of transfer learning (default: fine-tuning)')
     parser.add_argument('--model', default='resnet', choices=['resnet'], help='pre-trained model')
     parser.add_argument('--optimizer', default='adam', choices=['adam', 'sgd'], help='type of optimizer (default: adam)')
-    parser.add_argument('--plot', default=False, type=bool, help='create image for loss/accuracy')
-    parser.add_argument('--tensorboard', default=True, type=bool, help='write Tensorboard logs (default: True)')
-    parser.add_argument('--results-path', type=pathlib.Path, default='./results', help='path to models and logs (default: ./results)')
+    parser.add_argument('--plot', default=False, action='store_false', help='create image for loss/accuracy (default: False)')
+    parser.add_argument('--tensorboard', action='store_true', help='write Tensorboard logs (default: True)')
+    parser.add_argument('--results-path', type=pathlib.Path, default='./results', metavar='PATH', help='path to models and logs (default: ./results)')
     parser.add_argument('--batch', type=int, help='batch size')
     parser.add_argument('--lr', type=float, help='learning rate')
     parser.add_argument('--epochs', type=int, default=config.EPOCHS, help=f'number of epochs (default: {config.EPOCHS})')

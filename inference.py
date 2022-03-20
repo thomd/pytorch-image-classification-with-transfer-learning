@@ -55,13 +55,13 @@ def inference(args):
 
     print('[INFO] loading the test dataset ...')
     test_dataset = datasets.ImageFolder(root=args['dataset_path'], transform=test_transforms)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == "cuda" else False)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == 'cuda' else False)
 
     # check if we have a GPU available, if so, define the map location accordingly
     if torch.cuda.is_available():
         map_location = lambda storage, loc: storage.cuda()
     else:
-        map_location = "cpu"
+        map_location = 'cpu'
 
     # load the model
     print('[INFO] loading the model...')

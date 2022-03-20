@@ -32,11 +32,13 @@ Each class has it's own directory for the images. The images are then labeled wi
     kaggle datasets download -d imsparsh/flowers-dataset
     unzip flowers-dataset.zip -d flower-photos
     python build_dataset.py --help
-    python build_dataset.py
+    python build_dataset.py --images-path flower-photos/train
 
 ### Train by Feature Extraction
 
     ulimit -n 10240
+    python train.py --help
+    python train.py --show-labels
     python train.py --type feature-extraction
 
 ### Train by Fine Tuning
