@@ -26,7 +26,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Create Dataset.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--images-path', type=pathlib.Path, default=config.IMAGES_PATH, metavar='PATH', help='path to image data')
     parser.add_argument('--dataset-path', type=pathlib.Path, default=config.DATASET_PATH, metavar='PATH', help='path to dataset')
-    parser.add_argument('--shuffle', default=True, type=bool, help='shuffle images')
+    parser.add_argument('--shuffle', default=True, action='store_true', help='shuffle images')
     parser.add_argument('--test-split', default=config.TEST_SPLIT, type=float, metavar='VAL', help='test split')
     parser.add_argument('--val-split', default=config.VAL_SPLIT, type=float, metavar='VAL', help='validation split')
     args = vars(parser.parse_args())
