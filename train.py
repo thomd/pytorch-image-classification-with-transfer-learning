@@ -95,7 +95,7 @@ def train(args):
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == 'cuda' else False)
 
     if args['show_images']:
-        (batch, _) = next(iter(DataLoader(train_dataset, batch_size=16, shuffle=True)))
+        (batch, _) = next(iter(DataLoader(train_dataset, batch_size=args['show_images'], shuffle=True)))
         deNormalize = transforms.Normalize(mean=[-2.118, -2.036, -1.804], std=[4.367, 4.464, 4.444])
         plt.figure(figsize=(14, 4))
         plt.imshow(transforms.ToPILImage()(make_grid(deNormalize(batch))))
@@ -295,7 +295,7 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, help='learning rate')
     parser.add_argument('--epochs', type=int, default=config.EPOCHS, help=f'number of epochs (default: {config.EPOCHS})')
     parser.add_argument('--show-labels', action='store_true', help='show lables and exit')
-    parser.add_argument('--show-images', action='store_true', help='show one batch of augmented training images and exit')
+    parser.add_argument('--show-images', type=int, default=None, metavar='NUM', help='show samples of augmented training images and exit')
     parser.add_argument('--output-path', type=pathlib.Path, default='output', metavar='PATH', help='output path for images and plots')
     args = vars(parser.parse_args())
 
