@@ -97,7 +97,7 @@ def train(args):
     if args['show_images']:
         (batch, _) = next(iter(DataLoader(train_dataset, batch_size=args['show_images'], shuffle=True)))
         deNormalize = transforms.Normalize(mean=[-2.118, -2.036, -1.804], std=[4.367, 4.464, 4.444])
-        plt.figure(figsize=(14, 4))
+        plt.figure(figsize=(20, 10))
         plt.imshow(transforms.ToPILImage()(make_grid(deNormalize(batch))))
         plt.axis('off')
         image_path = os.path.join(args['output_path'], 'train_images.jpg')
@@ -164,7 +164,7 @@ def train(args):
     # initialize a dictionary to store training history
     log = {'train_loss': [], 'train_acc': [], 'val_loss': [], 'val_acc': []}
 
-    print(f'[INFO] model:         {args["model"]}')
+    print(f'\n[INFO] model:         {args["model"]}')
     print(f'[INFO] type:          {args["type"]}')
     print(f'[INFO] optimizer:     {args["optimizer"]}')
     print(f'[INFO] batch size:    {batch_size}')
