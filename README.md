@@ -27,12 +27,6 @@ Image folder expects the files and directories to be constructed like this:
 
 Each class has it's own directory for the images. The images are then labeled with the class taken from the directory name.
 
-### On Kaggle Datasets
-
-Image datasets hosted on [kaggle](https://www.kaggle.com/) tend to have redundant data, hence must be cleaned up carefully.
-
-
-
 ### Create Dataset
 
     kaggle datasets list -s flowers
