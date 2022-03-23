@@ -8,7 +8,7 @@ import os
 
 def copy_images(image_paths, folder):
     dataset_folder = os.path.join(args['dataset_path'], folder)
-    print(f'[INFO] moving {len(image_paths)} images into {dataset_folder}')
+    print(f'[INFO] copying {len(image_paths)} images into {dataset_folder}')
     if not os.path.exists(dataset_folder):
         os.makedirs(dataset_folder)
 
@@ -23,7 +23,25 @@ def copy_images(image_paths, folder):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Create Dataset.', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter, argparse.RawDescriptionHelpFormatter):
+        pass
+
+    parser = argparse.ArgumentParser(description='''Create Dataset.
+
+Image folder expects the files and directories to be constructed like this:
+
+    .
+    └── images
+        ├── label_1
+        │   ├── image_0.jpg
+        │   ├── image_1.jpg
+        │   └── image_2.jpg
+        └── label_2
+            ├── image_3.jpg
+            └── image_4.jpg
+
+Each class has it's own directory for the images. The images are then labeled with the class taken from the directory name.
+''', formatter_class=CustomFormatter)
     parser.add_argument('--images-path', type=pathlib.Path, default=config.IMAGES_PATH, metavar='PATH', help='path to image data')
     parser.add_argument('--dataset-path', type=pathlib.Path, default=config.DATASET_PATH, metavar='PATH', help='path to dataset')
     parser.add_argument('--shuffle', default=True, action='store_true', help='shuffle images')
@@ -34,6 +52,7 @@ if __name__ == '__main__':
     print('[INFO] loading images ...')
     image_paths = list(paths.list_images(args['images_path']))
     if args['shuffle']:
+        print('[INFO] shuffling image paths ...')
         np.random.shuffle(image_paths)
 
     test_paths_len = int(len(image_paths) * args['test_split'])

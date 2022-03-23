@@ -5,7 +5,7 @@ IMAGES_PATH = 'images'
 DATASET_PATH = 'dataset'
 
 TEST_SPLIT = 0.1
-VAL_SPLIT = 0.1
+VAL_SPLIT = 0.2
 TRAIN = 'train'
 VAL = 'val'
 TEST = 'test'

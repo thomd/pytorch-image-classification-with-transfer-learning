@@ -2,7 +2,7 @@
 
 In this experiment we train an image classifier using [transfer learning?](https://nbviewer.jupyter.org/github/thomd/pytorch-image-classification-with-transfer-learning/blob/main/transfer-learning.ipynb) of the pre-trained convolutional neural network **ResNet-50**.
 
-We use the [Flowers Dataset](https://www.kaggle.com/datasets/imsparsh/flowers-dataset/) to train the model.
+For this example, we use the [Flowers Dataset](https://www.kaggle.com/datasets/imsparsh/flowers-dataset/) to train the model.
 
 ## Local Setup
 
@@ -26,6 +26,12 @@ Image folder expects the files and directories to be constructed like this:
             └── image_4.jpg
 
 Each class has it's own directory for the images. The images are then labeled with the class taken from the directory name.
+
+### On Kaggle Datasets
+
+Image datasets hosted on [kaggle](https://www.kaggle.com/) tend to have redundant data, hence must be cleaned up carefully.
+
+
 
 ### Create Dataset
 
