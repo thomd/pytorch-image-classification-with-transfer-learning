@@ -35,7 +35,7 @@ def tree(dir_path, prefix=''):
 
 def list_images(image_path):
     image_types = ['.jpg', '.jpeg', '.png', '.bmp', '.tif', '.tiff']
-    image_paths = [(Path(p.parent).name, str(p)) for p in Path('temp').glob('*/*.*') if p.suffix in image_types]
+    image_paths = [(Path(p.parent).name, str(p)) for p in Path(image_path).glob('*/*.*') if p.suffix in image_types]
     label_paths = {}
     for i in image_paths:
         label_paths.setdefault(i[0],[]).append(i[1])
@@ -54,31 +54,35 @@ def build_dataset(args):
         return
 
     label_paths = list_images(args['images_path'])
+    labels = label_paths.keys()
 
-    for label in label_paths.keys():
-        print(f'[INFO] label: {label}')
-        image_paths = label_paths.get(label)
+    if len(labels) > 0:
+        for label in labels:
+            image_paths = label_paths.get(label)
+            print(f'[INFO] {len(image_paths)} images with label: {label}')
 
-        if args['shuffle']:
-            print('[INFO] shuffling image paths ...')
-            np.random.shuffle(image_paths)
+            if args['shuffle']:
+                print('[INFO] shuffling image paths ...')
+                np.random.shuffle(image_paths)
 
-        test_paths_len = int(len(image_paths) * args['test_split'])
-        val_paths_len = int(len(image_paths) * args['val_split'])
-        train_paths_len = len(image_paths) - test_paths_len - val_paths_len
+            test_paths_len = int(len(image_paths) * args['test_split'])
+            val_paths_len = int(len(image_paths) * args['val_split'])
+            train_paths_len = len(image_paths) - test_paths_len - val_paths_len
 
-        test_paths = image_paths[-test_paths_len:]
-        val_paths = image_paths[train_paths_len:-test_paths_len]
-        train_paths = image_paths[:train_paths_len]
+            test_paths = image_paths[-test_paths_len:]
+            val_paths = image_paths[train_paths_len:-test_paths_len]
+            train_paths = image_paths[:train_paths_len]
 
-        copy_images(train_paths, config.TRAIN)
-        copy_images(val_paths, config.VAL)
-        copy_images(test_paths, config.TEST)
+            copy_images(train_paths, config.TRAIN)
+            copy_images(val_paths, config.VAL)
+            copy_images(test_paths, config.TEST)
 
-    dataset_path = Path(args['dataset_path'])
-    print(f'\n{dataset_path.name}')
-    for line in tree(dataset_path):
-        print(line)
+        dataset_path = Path(args['dataset_path'])
+        print(f'\n{dataset_path.name}')
+        for line in tree(dataset_path):
+            print(line)
+    else:
+        print('No labels found.')
 
 
 if __name__ == '__main__':
