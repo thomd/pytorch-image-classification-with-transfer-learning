@@ -21,6 +21,7 @@ import pathlib
 
 def create_exeriment_path(base_path, *params):
     dirpath = pathlib.Path(base_path)
+    os.makedirs(ba_path, exist_ok=True)
     experiments = [0]
     for exp in dirpath.iterdir():
         if exp.is_dir():
