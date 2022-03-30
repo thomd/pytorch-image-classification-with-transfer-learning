@@ -63,13 +63,6 @@ def train(args):
         ToTensorV2(),
     ])
 
-    # val_transforms = A.Compose([
-        # A.Resize(256, 256),
-        # A.RandomCrop(224, 224),
-        # A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        # ToTensorV2(),
-    # ])
-
     train_image_folder = os.path.join(args['dataset_path'], config.TRAIN)
     train_dataset = datasets.ImageFolder(root=train_image_folder, transform=lambda img:train_transforms(image=np.array(img))['image'])
 
@@ -80,7 +73,6 @@ def train(args):
     ])
 
     val_image_folder = os.path.join(args['dataset_path'], config.VAL)
-    # val_dataset = datasets.ImageFolder(root=val_image_folder, transform=lambda img:val_transforms(image=np.array(img))['image'])
     val_dataset = datasets.ImageFolder(root=val_image_folder, transform=val_transforms)
 
     if args['show_labels']:
