@@ -4,3 +4,4 @@ flowers-dataset.zip
 output/*
 !output/.gitkeep
 runs
+*.onnx

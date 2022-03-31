@@ -6,10 +6,9 @@ For this example, we use the [Flowers Dataset](https://www.kaggle.com/datasets/i
 
 ## Local Setup
 
-    pyenv shell 3.9.10
-    python -m venv .venv
-    source .venv/bin/activate
-    pip install -r requirements.txt
+    conda create --name ictl python=3.9
+    conda activate ictl
+    conda env update --file environment.yml
 
 ### Image Data
 
@@ -84,3 +83,9 @@ Create new [Colab Notebook](https://colab.research.google.com) and run these com
 
     from IPython.display import Image
     display(Image('/path/to/iamge.png'))
+
+## Inference Endpoint with Fast API
+
+    pip install fastapi uvicorn
+    uvicorn main:app --reload
+
