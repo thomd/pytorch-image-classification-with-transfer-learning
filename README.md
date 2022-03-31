@@ -6,9 +6,8 @@ For this example, we use the [Flowers Dataset](https://www.kaggle.com/datasets/i
 
 ## Local Setup
 
-    conda create --name ictl python=3.9
+    conda env create -f environment.yml python=3.9
     conda activate ictl
-    conda env update --file environment.yml
 
 ### Image Data
 
