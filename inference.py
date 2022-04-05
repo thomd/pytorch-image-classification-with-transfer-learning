@@ -140,7 +140,7 @@ def inference(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Inference of Test Images', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--model', type=pathlib.Path, required=True, help='path to trained model model')
+    parser.add_argument('--model', type=pathlib.Path, required=True, help='path to trained .pth model')
     parser.add_argument('--dataset-path', type=pathlib.Path, default=os.path.join(config.DATASET_PATH), metavar='PATH', help='path to test dataset')
     parser.add_argument('--batch', type=int, default=config.PRED_BATCH_SIZE, help='batch size')
     parser.add_argument('--show-metrics', default=True, action='store_true', help='print inference metrics when testing a dataset batch')
