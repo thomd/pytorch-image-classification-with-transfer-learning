@@ -240,7 +240,7 @@ def train(args):
             torch.save(model, os.path.join(experiment_path, 'best_model.pth'))
             if args['export_onnx']:
                 dummy_input = torch.randn(1, 3, 224, 224)
-                torch.onnx.export(mnist, dummy_input, 'best_model.onnx', verbose=False, input_names=['image'], output_names=['prediction'])
+                torch.onnx.export(model, dummy_input, 'best_model.onnx', verbose=False, input_names=['image'], output_names=['prediction'])
 
         # update our training history
         log['train_loss'].append(avg_train_loss)
