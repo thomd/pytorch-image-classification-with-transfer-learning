@@ -25,7 +25,7 @@ def docs():
 @api.post('/image')
 async def upload_img(file: UploadFile = File(...)):
     image = await file.read()
-    image = Image.open(io.BytesIO(image))
+    image = Image.open(io.BytesIO(image)).convert('RGB')
     image = inference_transforms(image)
     image = image.unsqueeze(0)
     inputs = {session.get_inputs()[0].name: to_numpy(image)}
