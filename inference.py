@@ -81,7 +81,7 @@ def inference(args):
         else:
             print(f'[ERROR] Image {image_path} does not exist')
 
-    if args['image_url']:
+    elif args['image_url']:
         url = args['image_url']
         image = Image.open(requests.get(url, stream=True).raw)
         image = inference_transforms(image)
