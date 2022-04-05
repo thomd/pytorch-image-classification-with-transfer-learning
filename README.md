@@ -49,7 +49,7 @@ Each class has it's own directory for the images. The images are then labeled wi
     python inference.py --model output/finetune_model.pth
     python inference.py --model output/feature_extraction_model.pth
 
-## Run in Google Colab
+## Train in Google Colab
 
 Create new [Colab Notebook](https://colab.research.google.com) and run these commands:
 
@@ -81,10 +81,9 @@ Create new [Colab Notebook](https://colab.research.google.com) and run these com
     !python inference.py --model /path/to/model.pth
 
     from IPython.display import Image
-    display(Image('/path/to/iamge.png'))
+    display(Image('/path/to/image.png'))
 
 ## Inference Endpoint with Fast API
 
-    pip install fastapi uvicorn
-    uvicorn main:app --reload
-
+    uvicorn service:api --reload
+    curl http://127.0.0.1:8000/image -F "file=@path/to/image.jpg"
