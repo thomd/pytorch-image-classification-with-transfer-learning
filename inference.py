@@ -6,12 +6,14 @@ from torchvision.utils import save_image
 from torch import nn
 import torchmetrics
 import cv2
+from PIL import Image
 import math
 import numpy as np
 import argparse
 import pathlib
 import torch
 import os
+import requests
 
 def image_grid(tensor, true_labels, pred_labels, path, nrow=8, limit=None, pad=12):
     deNormalize = transforms.Normalize(mean=[-2.118, -2.036, -1.804], std=[4.367, 4.464, 4.444])
@@ -48,16 +50,11 @@ def image_grid(tensor, true_labels, pred_labels, path, nrow=8, limit=None, pad=1
 def inference(args):
     batch_size = args['batch']
 
-    test_transforms = transforms.Compose([
+    inference_transforms = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
-
-    print('[INFO] loading the test dataset ...')
-    test_image_folder = os.path.join(args['dataset_path'], config.TEST)
-    test_dataset = datasets.ImageFolder(root=test_image_folder, transform=test_transforms)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == 'cuda' else False)
 
     # check if we have a GPU available, if so, define the map location accordingly
     if torch.cuda.is_available():
@@ -71,55 +68,85 @@ def inference(args):
     model.to(config.DEVICE)
     model.eval()
 
-    # initialize metrics
-    metric_acc = torchmetrics.Accuracy()
-    metric_acc.to(config.DEVICE)
-    metric_confmat = torchmetrics.ConfusionMatrix(num_classes=2)
-    metric_confmat.to(config.DEVICE)
-    metric_precision = torchmetrics.Precision(average='none', num_classes=2)
-    metric_precision.to(config.DEVICE)
-    metric_recall = torchmetrics.Recall(average='none', num_classes=2)
-    metric_recall.to(config.DEVICE)
+    if args['image_path']:
+        image_path = pathlib.Path(args['image_path'])
+        if image_path.exists():
+            image = Image.open(str(image_path)).convert('RGB')
+            image = inference_transforms(image)
+            image = image.to(config.DEVICE)
+            image = image.unsqueeze(0)
+            preds = model(image)
+            pred_labels = preds.max(1).indices.cpu()
+            print(f'[INFO] Image {image_path} is of class: {pred_labels.item()}')
+        else:
+            print(f'[ERROR] Image {image_path} does not exist')
 
-    # switch off autograd
-    with torch.no_grad():
-        for (batch_idx, (images, labels)) in enumerate(test_loader):
-            (images, labels) = (images.to(config.DEVICE), labels.to(config.DEVICE))
-            preds = model(images)
+    if args['image_url']:
+        url = args['image_url']
+        image = Image.open(requests.get(url, stream=True).raw)
+        image = inference_transforms(image)
+        image = image.to(config.DEVICE)
+        image = image.unsqueeze(0)
+        preds = model(image)
+        pred_labels = preds.max(1).indices.cpu()
+        print(f'[INFO] Image {url} is of class: {pred_labels.item()}')
 
-            pred_labels = preds.max(1).indices
-            acc = metric_acc(labels, pred_labels)
-            confmat = metric_confmat(labels, pred_labels)
-            precision = metric_precision(labels, pred_labels)
-            recall = metric_recall(labels, pred_labels)
+    else:
+        print('[INFO] loading the test dataset ...')
+        test_image_folder = os.path.join(args['dataset_path'], config.TEST)
+        test_dataset = datasets.ImageFolder(root=test_image_folder, transform=inference_transforms)
+        test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == 'cuda' else False)
 
-            # save images for first batch
-            if batch_idx == 0:
-                image_path = image_grid(images, np.asarray(labels.cpu()), np.array(pred_labels.cpu()), args['output_path'])
-                print(f'[INFO] image location: {image_path}')
+        # initialize metrics
+        metric_acc = torchmetrics.Accuracy()
+        metric_acc.to(config.DEVICE)
+        metric_confmat = torchmetrics.ConfusionMatrix(num_classes=2)
+        metric_confmat.to(config.DEVICE)
+        metric_precision = torchmetrics.Precision(average='none', num_classes=2)
+        metric_precision.to(config.DEVICE)
+        metric_recall = torchmetrics.Recall(average='none', num_classes=2)
+        metric_recall.to(config.DEVICE)
 
-    if args['show_metrics']:
-        acc = metric_acc.compute()
-        print(f"\nAccuracy:        {acc:.3f}")
-        confmat = metric_confmat.compute()
-        print(f'True Positives:  {confmat[1, 1]}')
-        print(f'True Negatives:  {confmat[0, 0]}')
-        print(f'False Positives: {confmat[0, 1]}')
-        print(f'False Negatives: {confmat[1, 0]}')
-        precision = metric_precision.compute()
-        print(f'Precision:       {precision[1]:.3f}')
-        recall = metric_recall.compute()
-        print(f'Recall:          {recall[1]:.3f}')
+        # switch off autograd
+        with torch.no_grad():
+            for (batch_idx, (images, labels)) in enumerate(test_loader):
+                (images, labels) = (images.to(config.DEVICE), labels.to(config.DEVICE))
+                preds = model(images)
+
+                pred_labels = preds.max(1).indices
+                acc = metric_acc(labels, pred_labels)
+                confmat = metric_confmat(labels, pred_labels)
+                precision = metric_precision(labels, pred_labels)
+                recall = metric_recall(labels, pred_labels)
+
+                # save images for first batch
+                if batch_idx == 0:
+                    image_location = image_grid(images, np.asarray(labels.cpu()), np.array(pred_labels.cpu()), args['output_path'])
+                    print(f'[INFO] image location: {image_location}')
+
+        if args['show_metrics']:
+            acc = metric_acc.compute()
+            print(f"\nAccuracy:        {acc:.3f}")
+            confmat = metric_confmat.compute()
+            print(f'True Positives:  {confmat[1, 1]}')
+            print(f'True Negatives:  {confmat[0, 0]}')
+            print(f'False Positives: {confmat[0, 1]}')
+            print(f'False Negatives: {confmat[1, 0]}')
+            precision = metric_precision.compute()
+            print(f'Precision:       {precision[1]:.3f}')
+            recall = metric_recall.compute()
+            print(f'Recall:          {recall[1]:.3f}')
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Inference of Test Images', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--model', type=pathlib.Path, required=True, help='path to trained model model')
     parser.add_argument('--dataset-path', type=pathlib.Path, default=os.path.join(config.DATASET_PATH), metavar='PATH', help='path to test dataset')
-    parser.add_argument('--output-path', type=pathlib.Path, default='output', metavar='PATH', help='output path')
-    parser.add_argument('--image-path', type=pathlib.Path, metavar='PATH', help='path to test images instead of batch')
-    parser.add_argument('--show-metrics', default=True, action='store_true', help='print inference metrics')
     parser.add_argument('--batch', type=int, default=config.PRED_BATCH_SIZE, help='batch size')
+    parser.add_argument('--show-metrics', default=True, action='store_true', help='print inference metrics when testing a dataset batch')
+    parser.add_argument('--image-path', type=pathlib.Path, metavar='PATH', help='path to test images instead of dataset batch')
+    parser.add_argument('--image-url', type=str, metavar='URL', help='URL to test images instead of dataset batch')
+    parser.add_argument('--output-path', type=pathlib.Path, default='output', metavar='PATH', help='output path')
     args = vars(parser.parse_args())
 
     inference(args)

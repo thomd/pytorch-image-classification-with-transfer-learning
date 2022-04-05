@@ -5,4 +5,7 @@ output/*
 !output/.gitkeep
 runs
 *.onnx
+*.pth
+*.pt
 mnist/
+images/
