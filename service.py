@@ -7,7 +7,7 @@ import onnxruntime
 import io
 
 session = onnxruntime.InferenceSession('best_model.onnx')
-api = FastAPI()
+app = FastAPI()
 
 inference_transforms = transforms.Compose([
     transforms.Resize((224, 224)),
@@ -18,11 +18,11 @@ inference_transforms = transforms.Compose([
 def to_numpy(tensor):
     return tensor.detach().cpu().numpy() if tensor.requires_grad else tensor.cpu().numpy()
 
-@api.get('/')
+@app.get('/')
 def docs():
     return RedirectResponse(url='/docs')
 
-@api.post('/image')
+@app.post('/image')
 async def upload_img(file: UploadFile = File(...)):
     image = await file.read()
     image = Image.open(io.BytesIO(image)).convert('RGB')

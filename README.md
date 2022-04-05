@@ -68,22 +68,39 @@ Create new [Colab Notebook](https://colab.research.google.com) and run these com
     !unzip -qq flowers-dataset.zip -d flower-photos
 
     !python build_dataset.py --help
-    !python build_dataset.py
+    !python build_dataset.py --show-tree
 
     %load_ext tensorboard
 
     %tensorboard --logdir=./results
 
     !python train.py --help
-    !python train.py --type fine-tuning
+    !python train.py --show-labels
+    !python train.py --epochs 60 --batch 64 --lr 0.0001 --export-onnx
 
     !python inference.py --help
-    !python inference.py --model /path/to/model.pth
+    !python inference.py --model results/best_model.pth --batch 16
 
     from IPython.display import Image
     display(Image('/path/to/image.png'))
 
 ## Inference Endpoint with Fast API
 
-    uvicorn service:api --reload
-    curl http://127.0.0.1:8000/image -F "file=@path/to/image.jpg"
+This endpoint expects a trained **ONNX classification model** `best_model.onnx` in the root folder.
+
+Convert `best_model.pth` to `best_model.onnx` with:
+
+    import torch
+    model = torch.load('best_model.pth', map_location='cpu')
+    torch.onnx.export(model, torch.randn(1, 3, 224, 224), 'best_model.onnx')
+
+Either start [uvicorn](https://www.uvicorn.org/) web server with
+
+    uvicorn service:app --reload
+    curl -F "file=@path/to/image.jpg" -H "Content-Type: multipart/form-data" http://127.0.0.1:8000/image
+
+or run as **Docker container** with
+
+    docker-compose up -d --build
+    curl -F "file=@path/to/image.jpg" -H "Content-Type: multipart/form-data" http://127.0.0.1:8000/image
+    docker-compose down
