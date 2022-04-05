@@ -97,10 +97,10 @@ Convert `best_model.pth` to `best_model.onnx` with:
 Either start [uvicorn](https://www.uvicorn.org/) web server with
 
     uvicorn service:app --reload
-    curl -F "file=@path/to/image.jpg" -H "Content-Type: multipart/form-data" http://127.0.0.1:8000/image
+    curl -F "file=@image.jpg" -H "Content-Type: multipart/form-data" http://127.0.0.1:8000/image
 
 or run as **Docker container** with
 
     docker-compose up -d --build
-    curl -F "file=@path/to/image.jpg" -H "Content-Type: multipart/form-data" http://127.0.0.1:8000/image
+    curl -F "file=@image.jpg" -H "Content-Type: multipart/form-data" http://127.0.0.1:8000/image
     docker-compose down
