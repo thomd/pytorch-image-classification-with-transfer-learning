@@ -238,6 +238,9 @@ def train(args):
         if val_correct > best_val_correct:
             best_val_correct = val_correct
             torch.save(model, os.path.join(experiment_path, 'best_model.pth'))
+            if args['export_onnx']:
+                dummy_input = torch.randn(1, 3, 224, 224)
+                torch.onnx.export(mnist, dummy_input, 'best_model.onnx', verbose=False, input_names=['image'], output_names=['prediction'])
 
         # update our training history
         log['train_loss'].append(avg_train_loss)
@@ -290,6 +293,7 @@ if __name__ == '__main__':
     parser.add_argument('--show-labels', action='store_true', help='show lables and exit')
     parser.add_argument('--show-images', type=int, default=None, metavar='NUM', help='show samples of augmented training images and exit')
     parser.add_argument('--output-path', type=pathlib.Path, default='output', metavar='PATH', help='output path for images and plots')
+    parser.add_argument('--export-onnx', action='store_true', default=True, help='export model as *.pth and *.onnx')
     args = vars(parser.parse_args())
 
     train(args)
