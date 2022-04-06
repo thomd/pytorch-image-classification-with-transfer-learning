@@ -57,10 +57,7 @@ def inference(args):
     ])
 
     # check if we have a GPU available, if so, define the map location accordingly
-    if torch.cuda.is_available():
-        map_location = lambda storage, loc: storage.cuda()
-    else:
-        map_location = 'cpu'
+    map_location = lambda storage, loc: storage.cuda() if torch.cuda.is_available() else 'cpu'
 
     # load the model
     print('[INFO] loading the model...')

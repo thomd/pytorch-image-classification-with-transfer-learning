@@ -239,7 +239,7 @@ def train(args):
             best_val_correct = val_correct
             torch.save(model, os.path.join(experiment_path, 'best_model.pth'))
             if args['export_onnx']:
-                dummy_input = torch.randn(1, 3, 224, 224)
+                dummy_input = torch.randn(1, 3, 224, 224).to(config.DEVICE)
                 torch.onnx.export(model, dummy_input, os.path.join(experiment_path, 'best_model.onnx'), verbose=False, input_names=['image'], output_names=['prediction'])
 
         # update our training history
@@ -258,7 +258,7 @@ def train(args):
 
     # display the total time needed to perform the training
     end_time = time.time()
-    print(f'Total time to train the model: {(end_time - start_time):.2f}s')
+    print(f'\nTotal time to train the model: {(end_time - start_time):.2f}s')
     if args['tensorboard']:
         writer.flush()
         writer.close()
