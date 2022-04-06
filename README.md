@@ -36,7 +36,7 @@ For ease of demonstration, we only use the `train` part of the dataset and do a 
     python build_dataset.py --help
     python build_dataset.py --images-path flower-photos/train
 
-### Train Model by Transfer-Learning
+### Train and Validate Model by Transfer-Learning
 
     python train.py --help
     python train.py --show-labels
@@ -54,8 +54,18 @@ Train by Fine Tuning
 
 ### Test Model
 
-    python inference.py --model output/finetune_model.pth
-    python inference.py --model output/feature_extraction_model.pth
+Test a particular model from the experiments within the `results` folder:
+
+    python inference.py --model results/.../best_model.pth --batch 16
+
+Print result and label of a class with
+
+    open output/batch_16.png
+    python train.py --show-labels
+
+### Inference of an individual Image
+
+    python inference.py --model results/.../best_model.pth --image-path /path/to/image.jpg
 
 ## Train in Google Colab
 

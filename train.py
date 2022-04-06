@@ -76,7 +76,7 @@ def train(args):
     val_dataset = datasets.ImageFolder(root=val_image_folder, transform=val_transforms)
 
     if args['show_labels']:
-        print(f'{"NAME":<14} INDEX')
+        print(f'{"NAME":<14} CLASS')
         for label in train_dataset.class_to_idx.items():
             name, idx = label
             print(f'{name:<14} {idx}')

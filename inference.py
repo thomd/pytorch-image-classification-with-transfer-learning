@@ -43,8 +43,9 @@ def image_grid(tensor, true_labels, pred_labels, path, nrow=8, limit=None, pad=1
             k += 1
 
     filename = f'batch_{nmaps}.png'
-    save_image(grid, os.path.join(path, filename))
-    return filename
+    file_location = os.path.join(path, filename)
+    save_image(grid, file_location)
+    return file_location
 
 
 def inference(args):
@@ -57,7 +58,10 @@ def inference(args):
     ])
 
     # check if we have a GPU available, if so, define the map location accordingly
-    map_location = lambda storage, loc: storage.cuda() if torch.cuda.is_available() else 'cpu'
+    if torch.cuda.is_available():
+        map_location = lambda storage, loc: storage.cuda()
+    else:
+        map_location = 'cpu'
 
     # load the model
     print('[INFO] loading the model...')
@@ -95,13 +99,14 @@ def inference(args):
         test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
         # initialize metrics
+        num_classes=len(test_dataset.classes)
         metric_acc = torchmetrics.Accuracy()
         metric_acc.to(config.DEVICE)
-        metric_confmat = torchmetrics.ConfusionMatrix(num_classes=2)
+        metric_confmat = torchmetrics.ConfusionMatrix(num_classes=num_classes)
         metric_confmat.to(config.DEVICE)
-        metric_precision = torchmetrics.Precision(average='none', num_classes=2)
+        metric_precision = torchmetrics.Precision(average='none', num_classes=num_classes)
         metric_precision.to(config.DEVICE)
-        metric_recall = torchmetrics.Recall(average='none', num_classes=2)
+        metric_recall = torchmetrics.Recall(average='none', num_classes=num_classes)
         metric_recall.to(config.DEVICE)
 
         # switch off autograd
