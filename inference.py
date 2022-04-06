@@ -95,7 +95,7 @@ def inference(args):
         print('[INFO] loading the test dataset ...')
         test_image_folder = os.path.join(args['dataset_path'], config.TEST)
         test_dataset = datasets.ImageFolder(root=test_image_folder, transform=inference_transforms)
-        test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == 'cuda' else False)
+        test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
         # initialize metrics
         metric_acc = torchmetrics.Accuracy()

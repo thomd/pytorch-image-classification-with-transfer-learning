@@ -155,9 +155,6 @@ dependencies:
   - munkres=1.1.4=pyh9f0ad1d_0
   - nbclassic=0.3.7=pyhd8ed1ab_0
   - nbclient=0.5.13=pyhd8ed1ab_0
-  - nbconvert=6.4.5=pyhd8ed1ab_1
-  - nbconvert-core=6.4.5=pyhd8ed1ab_1
-  - nbconvert-pandoc=6.4.5=pyhd8ed1ab_1
   - nbformat=5.2.0=pyhd8ed1ab_0
   - ncurses=6.3=hc470f4d_0
   - nest-asyncio=1.5.4=pyhd8ed1ab_0

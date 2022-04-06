@@ -84,8 +84,8 @@ def train(args):
 
     num_classes = len(train_dataset.classes)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == 'cuda' else False)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=os.cpu_count(), pin_memory=True if config.DEVICE == 'cuda' else False)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
     if args['show_images']:
         (batch, _) = next(iter(DataLoader(train_dataset, batch_size=args['show_images'], shuffle=True)))
@@ -240,7 +240,7 @@ def train(args):
             torch.save(model, os.path.join(experiment_path, 'best_model.pth'))
             if args['export_onnx']:
                 dummy_input = torch.randn(1, 3, 224, 224)
-                torch.onnx.export(model, dummy_input, 'best_model.onnx', verbose=False, input_names=['image'], output_names=['prediction'])
+                torch.onnx.export(model, dummy_input, os.path.join(experiment_path, 'best_model.onnx'), verbose=False, input_names=['image'], output_names=['prediction'])
 
         # update our training history
         log['train_loss'].append(avg_train_loss)

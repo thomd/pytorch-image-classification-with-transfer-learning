@@ -2,8 +2,6 @@
 
 In this experiment we train an image classifier using [transfer learning?](https://nbviewer.jupyter.org/github/thomd/pytorch-image-classification-with-transfer-learning/blob/main/transfer-learning.ipynb) of the pre-trained convolutional neural network **ResNet-50**.
 
-For this example, we use the [Flowers Dataset](https://www.kaggle.com/datasets/imsparsh/flowers-dataset/) to train the model.
-
 ## Local Setup
 
     conda env create -f environment.yml python=3.9
@@ -27,24 +25,34 @@ Each class has it's own directory for the images. The images are then labeled wi
 
 ### Create Dataset
 
+For this example, we use the [Flowers Dataset](https://www.kaggle.com/datasets/imsparsh/flowers-dataset/) to train the model.
+
     kaggle datasets list -s flowers
     kaggle datasets download -d imsparsh/flowers-dataset
     unzip flowers-dataset.zip -d flower-photos
+
+For ease of demonstration, we only use the `train` part of the dataset and do a train-validate-test split ourself:
+
     python build_dataset.py --help
     python build_dataset.py --images-path flower-photos/train
 
-### Train by Feature Extraction
+### Train Model by Transfer-Learning
 
-    ulimit -n 10240
     python train.py --help
     python train.py --show-labels
-    python train.py --type feature-extraction
 
-### Train by Fine Tuning
+    tensorboard --logdir=results
+    open http://localhost:6006
 
-    python train.py --type fine-tuning
+Train by Feature Extraction
 
-### Inference
+    python train.py --type feature-extraction --epochs 50 --batch 32 --lr 0.001 --export-onnx
+
+Train by Fine Tuning
+
+    python train.py --type fine-tuning --epochs 50 --batch 32 --lr 0.0005 --export-onnx
+
+### Test Model
 
     python inference.py --model output/finetune_model.pth
     python inference.py --model output/feature_extraction_model.pth
@@ -68,7 +76,7 @@ Create new [Colab Notebook](https://colab.research.google.com) and run these com
     !unzip -qq flowers-dataset.zip -d flower-photos
 
     !python build_dataset.py --help
-    !python build_dataset.py --show-tree
+    !python build_dataset.py --images-path flower-photos/train
 
     %load_ext tensorboard
 
@@ -84,7 +92,7 @@ Create new [Colab Notebook](https://colab.research.google.com) and run these com
     from IPython.display import Image
     display(Image('/path/to/image.png'))
 
-## Inference Endpoint with Fast API
+## Run Inference Endpoint with Fast API
 
 This endpoint expects a trained **ONNX classification model** `best_model.onnx` in the root folder.
 
