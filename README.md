@@ -95,25 +95,22 @@ Create new [Colab Notebook](https://colab.research.google.com) and run these com
 
     !python inference.py --model results/.../best_model.pth --batch 16
     from IPython.display import Image
-    display(Image('/path/to/image.png'))
+    display(Image('output/batch_16.png'))
 
 ## Run Inference Endpoint with Fast API
 
-This endpoint expects a trained **ONNX classification model** `best_model.onnx` in the root folder.
+This endpoint expects a trained **ONNX classification model** `best_model.onnx` in the root folder:
 
-Convert `best_model.pth` to `best_model.onnx` with:
-
-    import torch
-    model = torch.load('best_model.pth', map_location='cpu')
-    torch.onnx.export(model, torch.randn(1, 3, 224, 224), 'best_model.onnx')
+    cp results/.../best_model.onnx .
 
 Either start [uvicorn](https://www.uvicorn.org/) web server with
 
-    uvicorn service:app --reload
+    uvicorn service:app
     curl -F "file=@image.jpg" -H "Content-Type: multipart/form-data" http://127.0.0.1:8000/image
 
-or run as **Docker container** with
+or build and run as **Docker container** with
 
     docker-compose up -d --build
+    docker logs image-classification
     curl -F "file=@image.jpg" -H "Content-Type: multipart/form-data" http://127.0.0.1:8000/image
     docker-compose down
