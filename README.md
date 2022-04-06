@@ -91,11 +91,9 @@ Create new [Colab Notebook](https://colab.research.google.com) and run these com
     %tensorboard --logdir=./results
 
     !python train.py --show-labels
-    !python train.py --epochs 60 --batch 64 --lr 0.0001 --export-onnx
+    !python train.py --epochs 60 --batch 64 --lr 0.0001
 
-    !python inference.py --help
-    !python inference.py --model results/best_model.pth --batch 16
-
+    !python inference.py --model results/.../best_model.pth --batch 16
     from IPython.display import Image
     display(Image('/path/to/image.png'))
 
