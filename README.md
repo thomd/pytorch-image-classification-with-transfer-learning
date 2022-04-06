@@ -63,7 +63,7 @@ Print result and label of a class with
     open output/batch_16.png
     python train.py --show-labels
 
-### Inference of an individual Image
+### Prediction of an individual Image
 
     python inference.py --model results/.../best_model.pth --image-path /path/to/image.jpg
 
@@ -114,3 +114,35 @@ or build and run as **Docker container** with
     docker logs image-classification
     curl -F "file=@image.jpg" -H "Content-Type: multipart/form-data" http://127.0.0.1:8000/image
     docker-compose down
+
+## Deploy Service as Azure Container Instance
+
+Use Azure Container Instances (ACI) to run serverless Docker containers in Azure.
+
+Create Azure Container Registry (ACR):
+
+    az login
+    az group create -n <group> -l <location>
+    az acr create -g <group> -n <reg> --sku Basic --admin-enabled true
+    az acr list -g <group> -o table
+
+Build & upload docker image to ACR
+
+    docker build -t image-classification-api .
+    docker tag image-classification-api <reg>.azurecr.io/image-classification-api:v1
+    az acr login -n <reg>
+    docker push <reg>.azurecr.io/image-classification-api:v1
+
+Create container (find username and password here: [Azure Portal](https://portal.azure.com) > Container Registry > Access Keys)
+
+    az container create -g <group> -n <container> --image <reg>.azurecr.io/image-classification-api:v1 --dns-name-label <label> --ports 80
+    az container show -g <group> -n <container> --query "{FQDN:ipAddress.fqdn,ProvisioningState:provisioningState}"
+    az container logs -g <group> -n <container> --follow
+
+Open SwaggerUI
+    
+    open http://<label>.<location>.azurecontainer.io
+
+Delete resource group
+    
+    az group delete -n <group>
