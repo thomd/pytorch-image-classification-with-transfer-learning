@@ -84,7 +84,7 @@ def inference(args):
 
     elif args['image_url']:
         url = args['image_url']
-        image = Image.open(requests.get(url, stream=True).raw)
+        image = Image.open(requests.get(url, stream=True).raw).convert('RGB')
         image = inference_transforms(image)
         image = image.to(config.DEVICE)
         image = image.unsqueeze(0)
