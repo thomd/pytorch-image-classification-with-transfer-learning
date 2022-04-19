@@ -9,7 +9,7 @@ In this experiment we train an image classifier using [transfer learning](https:
 
 ### Image Data
 
-Image folder expects the files and directories to be constructed like this:
+Images must be structured like this:
 
     .
     └── images
@@ -25,7 +25,7 @@ Each class has it's own directory for the images. The images are then labeled wi
 
 ### Create Dataset
 
-For this example, we use the [Flowers Dataset](https://www.kaggle.com/datasets/imsparsh/flowers-dataset/) to train the model.
+For this example, we use the [Flowers Dataset](https://www.kaggle.com/datasets/imsparsh/flowers-dataset/) to train a flower-classification model:
 
     kaggle datasets list -s flowers
     kaggle datasets download -d imsparsh/flowers-dataset
@@ -54,9 +54,9 @@ Train by Fine Tuning
 
 ### Test Model
 
-Test a particular model from the experiments within the `results` folder:
+Test a specific model from all experiments within the `results` folder:
 
-    python inference.py --model results/.../best_model.pth --batch 16
+    python inference.py --model results/{best-experiment}/best_model.pth --batch 16
 
 Print result and label of a class with
 
@@ -101,7 +101,7 @@ Create new [Colab Notebook](https://colab.research.google.com) and run these com
 
 This endpoint expects a trained **ONNX classification model** `best_model.onnx` in the root folder:
 
-    cp results/.../best_model.onnx .
+    cp results/{best-experiment}/best_model.onnx .
 
 Either start [uvicorn](https://www.uvicorn.org/) web server with
 
